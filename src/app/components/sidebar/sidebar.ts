@@ -1,32 +1,27 @@
 import {
   Component,
-  OnInit,
   ChangeDetectionStrategy,
   ViewEncapsulation,
   signal,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
-import { MatTreeModule } from '@angular/material/tree';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeNestedDataSource } from '@angular/material/tree';
 
-interface MenuNode {
+interface MenuItem {
   name: string;
-  icon?: string;
-  route?: string;
-  children?: MenuNode[];
-  expanded?: boolean;
+  icon: string;
+  route: string;
+  children?: MenuItem[];
 }
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [
@@ -35,23 +30,23 @@ interface MenuNode {
     MatIconModule,
     MatButtonModule,
     MatListModule,
-    MatTreeModule,
   ],
 })
-export default class Sidebar implements OnInit {
-  treeControl = new NestedTreeControl<MenuNode>((node) => node.children);
-  dataSource = new MatTreeNestedDataSource<MenuNode>();
-  currentRoute = signal<string>('dashboard');
+export default class Sidebar {
+  private router = inject(Router);
 
-  menuData: MenuNode[] = [
-    {
-      name: 'Dashboard',
-      icon: 'dashboard',
-      route: 'dashboard',
-    },
+  currentRoute = signal<string>('');
+  expandedCategories = signal<Set<string>>(new Set(['Satış İşlemleri']));
+
+  singleItems: MenuItem[] = [
+    { name: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
+  ];
+
+  categories: MenuItem[] = [
     {
       name: 'Satış İşlemleri',
       icon: 'point_of_sale',
+      route: '',
       children: [
         { name: 'Satış Yap', icon: 'shopping_cart', route: 'sales' },
         { name: 'Hızlı Satış', icon: 'flash_on', route: 'quick-sales' },
@@ -61,6 +56,7 @@ export default class Sidebar implements OnInit {
     {
       name: 'Siparişler',
       icon: 'receipt_long',
+      route: '',
       children: [
         {
           name: 'Sipariş Oluştur',
@@ -78,6 +74,7 @@ export default class Sidebar implements OnInit {
     {
       name: 'Stok Yönetimi',
       icon: 'inventory_2',
+      route: '',
       children: [
         { name: 'Ürün Listesi', icon: 'inventory', route: 'inventory' },
         { name: 'Stok Girişi', icon: 'add_box', route: 'stock-in' },
@@ -92,6 +89,7 @@ export default class Sidebar implements OnInit {
     {
       name: 'Raporlar',
       icon: 'analytics',
+      route: '',
       children: [
         { name: 'Satış Raporları', icon: 'trending_up', route: 'reports' },
         { name: 'Stok Raporları', icon: 'storage', route: 'stock-reports' },
@@ -105,6 +103,7 @@ export default class Sidebar implements OnInit {
     {
       name: 'Ayarlar',
       icon: 'settings',
+      route: '',
       children: [
         { name: 'Genel Ayarlar', icon: 'tune', route: 'settings' },
         { name: 'Kullanıcı Yönetimi', icon: 'people', route: 'users' },
@@ -113,35 +112,53 @@ export default class Sidebar implements OnInit {
     },
   ];
 
-  ngOnInit() {
-    this.dataSource.data = this.menuData;
+  constructor() {
+    // Set initial route
+    this.updateCurrentRoute();
   }
 
-  hasChild = (_: number, node: MenuNode) =>
-    !!node.children && node.children.length > 0;
-
-  toggleNode(node: MenuNode) {
-    this.treeControl.toggle(node);
+  navigate(route: string) {
+    console.log(`Navigating to: ${route}`);
+    this.router
+      .navigate([route])
+      .then((success) => {
+        console.log('Navigation result:', success);
+        if (success) {
+          this.updateCurrentRoute();
+        }
+      })
+      .catch((error) => {
+        console.error('Navigation error:', error);
+      });
   }
 
-  isActiveRoute(route?: string): boolean {
-    return route === this.currentRoute();
-  }
+  toggleCategory(categoryName: string) {
+    const expanded = this.expandedCategories();
+    const newExpanded = new Set(expanded);
 
-  navigateToRoute(route?: string) {
-    if (route) {
-      this.currentRoute.set(route);
+    if (newExpanded.has(categoryName)) {
+      newExpanded.delete(categoryName);
+    } else {
+      newExpanded.add(categoryName);
     }
+
+    this.expandedCategories.set(newExpanded);
+    console.log(`Toggled category: ${categoryName}`, newExpanded);
   }
 
-  getCategoryColor(categoryId: string): string {
-    const colors: { [key: string]: string } = {
-      sales: 'primary',
-      orders: 'accent',
-      inventory: 'warn',
-      reports: 'primary',
-      settings: 'warn',
-    };
-    return colors[categoryId] || 'primary';
+  isExpanded(categoryName: string): boolean {
+    return this.expandedCategories().has(categoryName);
+  }
+
+  isActive(route: string): boolean {
+    const current = this.currentRoute();
+    return current === route;
+  }
+
+  private updateCurrentRoute() {
+    const url = this.router.url;
+    const route = url.split('/').filter((segment) => segment)[0] || 'dashboard';
+    this.currentRoute.set(route);
+    console.log(`Current route updated to: ${route}`);
   }
 }

@@ -46,7 +46,6 @@ export default class Home implements OnInit {
   @ViewChild('barcodeInput') barcodeInput!: ElementRef<HTMLInputElement>;
 
   private layout = inject(Layout);
-  private snackBar = inject(MatSnackBar);
 
   // Signals
   selectedCategory = signal<string>('all');

@@ -19,7 +19,6 @@ import Layout from '../../layout/layout';
     MatIconModule,
     CurrencyPipe,
     DatePipe,
-    DecimalPipe
   ]
 })
 export default class Dashboard {
