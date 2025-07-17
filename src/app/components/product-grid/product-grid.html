@@ -1,0 +1,73 @@
+<mat-card class="product-grid-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>inventory_2</mat-icon>
+      Ürün Listesi
+    </mat-card-title>
+    <mat-card-subtitle>Kategoriye göre ürünleri görüntüleyin</mat-card-subtitle>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <!-- Kategori Filtreleri -->
+    <div class="filter-section">
+      <mat-form-field appearance="outline">
+        <mat-label>Kategori</mat-label>
+        <mat-select [(ngModel)]="selectedCategory" (selectionChange)="selectCategory(selectedCategory())">
+          <mat-option value="all">Tüm Kategoriler</mat-option>
+          <mat-option value="vitamin">Vitamin & Mineral</mat-option>
+          <mat-option value="skincare">Dermokozmetik</mat-option>
+          <mat-option value="supplement">Besin Destek</mat-option>
+          <mat-option value="hygiene">Kişisel Bakım</mat-option>
+          <mat-option value="baby">Bebek Bakım</mat-option>
+          <mat-option value="medical">Tıbbi Cihaz</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Ürün Grid -->
+    <div class="products-grid">
+      @for (product of filteredProducts(); track product.id) {
+        <div class="product-item" 
+             [class.low-stock]="product.stock < 10"
+             (click)="selectProduct(product)">
+          <div class="product-header">
+            <h3>{{ product.name }}</h3>
+            <mat-icon class="category-icon">{{ getCategoryIcon(product.category) }}</mat-icon>
+          </div>
+          
+          <div class="product-details">
+            <p class="brand">{{ product.brand }}</p>
+            <p class="barcode">{{ product.barcode }}</p>
+            <div class="stock-info">
+              <mat-icon [class]="getStockClass(product.stock)">
+                {{ getStockIcon(product.stock) }}
+              </mat-icon>
+              <span [class]="getStockClass(product.stock)">
+                Stok: {{ product.stock }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="product-footer">
+            <div class="price">
+              <span class="currency">₺</span>
+              <span class="amount">{{ product.price.toFixed(2) }}</span>
+            </div>
+            <button mat-raised-button color="primary" (click)="selectProduct(product); $event.stopPropagation()">
+              <mat-icon>add_shopping_cart</mat-icon>
+              Sepete Ekle
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+    
+    @if (filteredProducts().length === 0) {
+      <div class="no-products">
+        <mat-icon>inventory</mat-icon>
+        <h3>Ürün bulunamadı</h3>
+        <p>Seçilen kategoride ürün mevcut değil.</p>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,30 @@
+<div class="sidebar-content">
+  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="navigation-tree">
+    <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="tree-node">
+      <button mat-button class="tree-node-button" 
+              [class.active]="isActiveRoute(node.route)"
+              [routerLink]="node.route">
+        <mat-icon class="node-icon">{{ node.icon }}</mat-icon>
+        <span class="node-label">{{ node.name }}</span>
+      </button>
+    </mat-tree-node>
+
+    <mat-tree-node *matTreeNodeDef="let node; when: hasChild" 
+                  matTreeNodeToggle class="tree-node">
+      <button mat-button class="tree-node-button tree-parent" 
+              [class.expanded]="treeControl.isExpanded(node)"
+              (click)="toggleNode(node)">
+        <mat-icon class="node-icon">{{ node.icon }}</mat-icon>
+        <span class="node-label">{{ node.name }}</span>
+        <mat-icon class="expand-icon">
+          {{ treeControl.isExpanded(node) ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </button>
+      
+      <div class="tree-children" 
+           [class.expanded]="treeControl.isExpanded(node)">
+        <ng-container matTreeNodeOutlet></ng-container>
+      </div>
+    </mat-tree-node>
+  </mat-tree>
+</div>

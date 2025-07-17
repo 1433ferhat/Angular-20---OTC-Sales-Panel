@@ -1,0 +1,226 @@
+.backup-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  
+  .page-header {
+    flex-shrink: 0;
+    
+    mat-card-header {
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        mat-icon {
+          color: #ff9800;
+        }
+      }
+    }
+  }
+  
+  .backup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    
+    .backup-status-card {
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          mat-icon {
+            color: #2196f3;
+          }
+        }
+      }
+      
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        
+        .status-item {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 16px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          
+          .status-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+          }
+          
+          .status-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+            
+            mat-chip {
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+    
+    .manual-backup-card {
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          mat-icon {
+            color: #4caf50;
+          }
+        }
+      }
+      
+      .backup-progress {
+        text-align: center;
+        padding: 24px;
+        
+        h4 {
+          margin: 0 0 16px 0;
+          color: #333;
+        }
+        
+        mat-progress-bar {
+          margin: 16px 0;
+          height: 8px;
+        }
+        
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: #666;
+        }
+      }
+      
+      .backup-actions {
+        text-align: center;
+        padding: 24px;
+        
+        p {
+          margin: 0 0 24px 0;
+          color: #666;
+        }
+        
+        button {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          margin: 0 8px;
+        }
+      }
+    }
+    
+    .backup-history-card {
+      flex: 1;
+      
+      mat-card-header {
+        mat-card-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          mat-icon {
+            color: #673ab7;
+          }
+        }
+      }
+      
+      .backup-list {
+        padding: 0;
+        
+        .backup-item {
+          padding: 16px;
+          min-height: 80px;
+          
+          .backup-info {
+            flex: 1;
+            
+            h4 {
+              margin: 0 0 8px 0;
+              font-size: 14px;
+              font-weight: 500;
+              color: #333;
+              font-family: 'Roboto Mono', monospace;
+            }
+            
+            .backup-meta {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              flex-wrap: wrap;
+              
+              .backup-date {
+                font-size: 12px;
+                color: #666;
+              }
+              
+              .backup-size {
+                font-size: 12px;
+                color: #999;
+                background: #f0f0f0;
+                padding: 2px 6px;
+                border-radius: 4px;
+              }
+              
+              .backup-type {
+                font-size: 11px;
+                height: 20px;
+                line-height: 20px;
+              }
+            }
+          }
+          
+          .backup-actions {
+            display: flex;
+            gap: 4px;
+            
+            button {
+              width: 36px;
+              height: 36px;
+              line-height: 36px;
+            }
+          }
+        }
+      }
+      
+      .no-backups {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        color: #999;
+        
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          margin-bottom: 16px;
+          color: #ddd;
+        }
+        
+        h3 {
+          margin: 0 0 8px 0;
+          font-size: 18px;
+        }
+        
+        p {
+          margin: 0;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}

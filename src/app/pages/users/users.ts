@@ -1,0 +1,112 @@
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ViewEncapsulation,
+  signal,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
+import { UserModel } from '@shared/models/user.model';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+@Component({
+  selector: 'app-users',
+  templateUrl: './users.html',
+  styleUrl: './users.scss',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTableModule,
+    MatChipsModule,
+    MatDialogModule,
+    MatTooltipModule,
+  ],
+})
+export default class Users {
+  users = signal<UserModel[]>([
+    {
+      id: 1,
+      name: 'Admin User',
+      email: 'admin@otc.com',
+      role: 'admin',
+      status: 'active',
+      lastLogin: new Date(),
+    },
+    {
+      id: 2,
+      name: 'Kasiyer Ali',
+      email: 'ali@otc.com',
+      role: 'cashier',
+      status: 'active',
+      lastLogin: new Date(Date.now() - 86400000), // 1 day ago
+    },
+    {
+      id: 3,
+      name: 'Müdür Ayşe',
+      email: 'ayse@otc.com',
+      role: 'manager',
+      status: 'active',
+      lastLogin: new Date(Date.now() - 3600000), // 1 hour ago
+    },
+  ]);
+
+  displayedColumns: string[] = [
+    'name',
+    'email',
+    'role',
+    'status',
+    'lastLogin',
+    'actions',
+  ];
+
+  addUser() {
+    console.log('Yeni kullanıcı ekle');
+  }
+
+  editUser(user: UserModel) {
+    console.log('Kullanıcı düzenle:', user);
+  }
+
+  deleteUser(userId: number) {
+    console.log('Kullanıcı sil:', userId);
+  }
+
+  toggleUserStatus(userId: number) {
+    const userList = this.users();
+    const updatedUsers = userList.map((user) =>
+      user.id === userId
+        ? {
+            ...user,
+            status:
+              user.status === 'active'
+                ? 'inactive'
+                : ('active' as 'active' | 'inactive'),
+          }
+        : user
+    );
+    this.users.set(updatedUsers);
+  }
+
+  getRoleText(role: string): string {
+    const roles: any = {
+      admin: 'Yönetici',
+      cashier: 'Kasiyer',
+      manager: 'Müdür',
+    };
+    return roles[role] || role;
+  }
+
+  getStatusText(status: string): string {
+    return status === 'active' ? 'Aktif' : 'Pasif';
+  }
+}

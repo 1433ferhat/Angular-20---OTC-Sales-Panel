@@ -1,0 +1,47 @@
+<div class="sales-page">
+  <!-- Barkod Okutma Alanı -->
+  <app-barcode-scanner 
+    (productFound)="onProductFound($event)">
+  </app-barcode-scanner>
+
+  <!-- Kategori Filtreleri -->
+  <mat-card class="category-filters">
+    <mat-card-content>
+      <div class="filter-chips">
+        <h3>Kategoriler</h3>
+        <div class="chips-container">
+          <button mat-raised-button 
+                  [color]="selectedCategory() === 'all' ? 'primary' : ''"
+                  (click)="selectCategory('all')">
+            <mat-icon>inventory</mat-icon>
+            Tüm Ürünler
+          </button>
+          <button mat-raised-button 
+                  [color]="selectedCategory() === 'vitamin' ? 'primary' : ''"
+                  (click)="selectCategory('vitamin')">
+            <mat-icon>medication</mat-icon>
+            Vitamin & Mineral
+          </button>
+          <button mat-raised-button 
+                  [color]="selectedCategory() === 'skincare' ? 'primary' : ''"
+                  (click)="selectCategory('skincare')">
+            <mat-icon>face</mat-icon>
+            Dermokozmetik
+          </button>
+          <button mat-raised-button 
+                  [color]="selectedCategory() === 'supplement' ? 'primary' : ''"
+                  (click)="selectCategory('supplement')">
+            <mat-icon>eco</mat-icon>
+            Besin Destek
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Ürün Grid -->
+  <app-product-grid 
+    [products]="filteredProducts()" 
+    (productSelected)="onProductSelected($event)">
+  </app-product-grid>
+</div>

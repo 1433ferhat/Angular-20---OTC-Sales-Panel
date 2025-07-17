@@ -1,0 +1,107 @@
+.app-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    
+    .app-icon {
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+    
+    .app-title {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .header-spacer {
+      flex: 1 1 auto;
+    }
+    
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 16px;
+      
+      span {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .app-container {
+    flex: 1;
+    overflow: hidden;
+    
+    .app-sidenav {
+      width: 280px;
+      border-right: 1px solid #e0e0e0;
+    }
+    
+    .app-content {
+      flex: 1;
+      overflow: hidden;
+      
+      .content-wrapper {
+        height: 100%;
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 16px;
+        padding: 16px;
+        overflow: hidden;
+        
+        .left-content {
+          overflow-y: auto;
+        }
+        
+        .right-panel {
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .app-layout {
+    .app-container {
+      .app-content {
+        .content-wrapper {
+          grid-template-columns: 1fr;
+          grid-template-rows: 1fr auto;
+          
+          .right-panel {
+            max-height: 300px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    .app-container {
+      .app-sidenav {
+        width: 240px;
+      }
+      
+      .app-content {
+        .content-wrapper {
+          padding: 8px;
+          gap: 8px;
+        }
+      }
+    }
+  }
+}

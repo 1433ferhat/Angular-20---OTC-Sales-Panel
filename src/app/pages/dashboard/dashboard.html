@@ -1,0 +1,151 @@
+<div class="dashboard-page">
+  <!-- Özet Kartları -->
+  <div class="summary-cards">
+    <mat-card class="summary-card sales">
+      <mat-card-content>
+        <div class="card-header">
+          <mat-icon>trending_up</mat-icon>
+          <h3>Günlük Satış</h3>
+        </div>
+        <div class="card-value">
+          <span class="amount">{{ todaysSales() | currency:'TRY':'symbol':'1.2-2' }}</span>
+          <span class="change positive">+12.5%</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="summary-card orders">
+      <mat-card-content>
+        <div class="card-header">
+          <mat-icon>receipt</mat-icon>
+          <h3>Toplam Sipariş</h3>
+        </div>
+        <div class="card-value">
+          <span class="amount">{{ getTodaysOrderCount() }}</span>
+          <span class="change positive">+8.2%</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="summary-card products">
+      <mat-card-content>
+        <div class="card-header">
+          <mat-icon>inventory</mat-icon>
+          <h3>Toplam Ürün</h3>
+        </div>
+        <div class="card-value">
+          <span class="amount">{{ getTotalProducts() }}</span>
+          <span class="change neutral">0%</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    
+    <mat-card class="summary-card alerts">
+      <mat-card-content>
+        <div class="card-header">
+          <mat-icon>warning</mat-icon>
+          <h3>Düşük Stok</h3>
+        </div>
+        <div class="card-value">
+          <span class="amount">{{ lowStockProducts().length }}</span>
+          <span class="change negative">+3</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Dashboard İçeriği -->
+  <div class="dashboard-content">
+    <!-- Sol Kolon -->
+    <div class="left-column">
+      <!-- Düşük Stok Uyarıları -->
+      <mat-card class="low-stock-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>warning</mat-icon>
+            Düşük Stok Uyarıları
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          @if (lowStockProducts().length === 0) {
+            <div class="no-alerts">
+              <mat-icon>check_circle</mat-icon>
+              <p>Düşük stok uyarısı yok</p>
+            </div>
+          } @else {
+            <div class="low-stock-list">
+              @for (product of lowStockProducts(); track product.id) {
+                <div class="low-stock-item">
+                  <div class="product-info">
+                    <h4>{{ product.name }}</h4>
+                    <p>{{ product.brand }}</p>
+                  </div>
+                  <div class="stock-amount" [class.critical]="product.stock < 5">
+                    <mat-icon>{{ product.stock < 5 ? 'error' : 'warning' }}</mat-icon>
+                    <span>{{ product.stock }} adet</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Hızlı İşlemler -->
+      <mat-card class="quick-actions-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>flash_on</mat-icon>
+            Hızlı İşlemler
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="quick-actions">
+            <button mat-raised-button color="primary" routerLink="/sales">
+              <mat-icon>add_shopping_cart</mat-icon>
+              <span>Yeni Satış</span>
+            </button>
+            <button mat-raised-button color="accent" routerLink="/inventory">
+              <mat-icon>inventory</mat-icon>
+              <span>Stok Girişi</span>
+            </button>
+            <button mat-raised-button routerLink="/orders">
+              <mat-icon>receipt_long</mat-icon>
+              <span>Sipariş Geçmişi</span>
+            </button>
+            <button mat-raised-button routerLink="/reports">
+              <mat-icon>analytics</mat-icon>
+              <span>Raporlar</span>
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Sağ Kolon -->
+    <div class="right-column">
+      <!-- Son Aktiviteler -->
+      <mat-card class="activities-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>history</mat-icon>
+            Son Aktiviteler
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="activities-list">
+            @for (activity of getRecentActivities(); track activity.id) {
+              <div class="activity-item">
+                <mat-icon [class]="activity.type">{{ activity.icon }}</mat-icon>
+                <div class="activity-content">
+                  <p>{{ activity.message }}</p>
+                  <small>{{ activity.time | date:'HH:mm' }}</small>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

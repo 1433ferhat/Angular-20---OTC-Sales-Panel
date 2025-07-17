@@ -1,0 +1,13 @@
+<div class="orders-page">
+  <mat-card class="page-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>receipt_long</mat-icon>
+        Sipariş Yönetimi
+      </mat-card-title>
+      <mat-card-subtitle>Tüm siparişlerinizi buradan yönetebilirsiniz</mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <app-order-list [orders]="orders()" (orderSelected)="onOrderSelected($event)"/>
+</div>

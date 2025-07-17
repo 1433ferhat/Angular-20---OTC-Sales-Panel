@@ -1,0 +1,46 @@
+<mat-card class="barcode-scanner-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>qr_code_scanner</mat-icon>
+      Barkod Okutma
+    </mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div class="scanner-container">
+      <mat-form-field appearance="outline" class="barcode-input">
+        <mat-label>Barkod veya Ürün Adı</mat-label>
+        <input matInput 
+               #barcodeInput
+               [(ngModel)]="barcode"
+               (keydown)="onKeyDown($event)"
+               placeholder="Barkod okutun..."
+               autocomplete="off">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      
+      <button mat-raised-button color="primary" (click)="searchProduct()">
+        <mat-icon>search</mat-icon>
+        Ara
+      </button>
+    </div>
+
+    <!-- Search Results -->
+    @if (searchResults().length > 1) {
+      <div class="search-results">
+        <h3>Arama Sonuçları</h3>
+        @for (product of searchResults(); track product.id) {
+          <div class="result-item" (click)="selectProduct(product)">
+            <div class="product-info">
+              <h4>{{ product.name }}</h4>
+              <p>{{ product.brand }} - {{ product.barcode }}</p>
+            </div>
+            <div class="product-price">
+              <span>{{ product.price | currency:'TRY':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

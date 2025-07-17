@@ -1,0 +1,77 @@
+<mat-card class="order-panel-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>receipt</mat-icon>
+      Sipariş Detayları
+    </mat-card-title>
+    <mat-card-subtitle>{{ currentOrder?.id }}</mat-card-subtitle>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div class="order-items-container">
+      @if (cart.length === 0) {
+        <div class="empty-cart">
+          <mat-icon>shopping_cart</mat-icon>
+          <p>Sipariş boş</p>
+        </div>
+      } @else {
+        <div class="order-items">
+          @for (item of cart; track item.id) {
+            <div class="order-item">
+              <div class="item-details">
+                <h4>{{ item.name }}</h4>
+                <p>{{ item.brand }}</p>
+                <small>{{ item.barcode }}</small>
+              </div>
+              <div class="item-controls">
+                <div class="quantity-control">
+                  <button mat-icon-button (click)="changeQuantity(item.id, -1)">
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <span>{{ item.quantity }}</span>
+                  <button mat-icon-button (click)="changeQuantity(item.id, 1)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+                <div class="item-price">
+                  <span>{{ item.totalPrice | currency:'TRY':'symbol':'1.2-2' }}</span>
+                </div>
+                <button mat-icon-button color="warn" (click)="removeItem(item.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (cart.length > 0) {
+      <div class="order-summary">
+        <div class="summary-row">
+          <span>Toplam Ürün:</span>
+          <span>{{ cartItemCount }} adet</span>
+        </div>
+        <div class="summary-row total">
+          <span>Genel Toplam:</span>
+          <span>{{ cartTotal | currency:'TRY':'symbol':'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="payment-actions">
+        <button mat-raised-button color="primary" (click)="completeOrder('card')">
+          <mat-icon>credit_card</mat-icon>
+          Kartla Öde
+        </button>
+        <button mat-raised-button color="accent" (click)="completeOrder('cash')">
+          <mat-icon>payments</mat-icon>
+          Nakit Öde
+        </button>
+        <button mat-button color="warn" (click)="cancelOrder()">
+          <mat-icon>cancel</mat-icon>
+          İptal
+        </button>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

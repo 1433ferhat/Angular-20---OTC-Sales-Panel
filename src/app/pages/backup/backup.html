@@ -1,0 +1,124 @@
+<div class="backup-page">
+  <mat-card class="page-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>backup</mat-icon>
+        Yedekleme
+      </mat-card-title>
+      <mat-card-subtitle>Veri yedekleme ve geri yükleme işlemleri</mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <div class="backup-content">
+    <!-- Yedekleme Durumu -->
+    <mat-card class="backup-status-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>info</mat-icon>
+          Yedekleme Durumu
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-label">Son Yedekleme:</div>
+            <div class="status-value">{{ lastBackupDate() | date:'dd.MM.yyyy HH:mm' }}</div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Otomatik Yedekleme:</div>
+            <div class="status-value">
+              <mat-chip [color]="autoBackupEnabled() ? 'accent' : ''">
+                {{ autoBackupEnabled() ? 'Açık' : 'Kapalı' }}
+              </mat-chip>
+            </div>
+          </div>
+          <div class="status-item">
+            <div class="status-label">Toplam Yedek:</div>
+            <div class="status-value">{{ backupHistory().length }} dosya</div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Manuel Yedekleme -->
+    <mat-card class="manual-backup-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>build</mat-icon>
+          Manuel Yedekleme
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (isBackingUp()) {
+          <div class="backup-progress">
+            <h4>Yedekleme devam ediyor...</h4>
+            <mat-progress-bar mode="determinate" [value]="backupProgress()"></mat-progress-bar>
+            <p>%{{ backupProgress() }} tamamlandı</p>
+          </div>
+        } @else {
+          <div class="backup-actions">
+            <p>Sistemin anlık yedeğini almak için aşağıdaki butona tıklayın.</p>
+            <button mat-raised-button color="primary" (click)="startManualBackup()">
+              <mat-icon>backup</mat-icon>
+              Yedek Al
+            </button>
+            <button mat-button (click)="toggleAutoBackup()">
+              <mat-icon>{{ autoBackupEnabled() ? 'toggle_off' : 'toggle_on' }}</mat-icon>
+              Otomatik Yedeklemeyi {{ autoBackupEnabled() ? 'Kapat' : 'Aç' }}
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Yedek Geçmişi -->
+    <mat-card class="backup-history-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon>
+          Yedek Geçmişi
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-list class="backup-list">
+          @for (backup of backupHistory(); track backup.id) {
+            <mat-list-item class="backup-item">
+              <mat-icon matListItemIcon [style.color]="getStatusColor(backup.status)">
+                {{ getStatusIcon(backup.status) }}
+              </mat-icon>
+              
+              <div matListItemTitle class="backup-info">
+                <h4>{{ backup.fileName }}</h4>
+                <div class="backup-meta">
+                  <span class="backup-date">{{ backup.date | date:'dd.MM.yyyy HH:mm' }}</span>
+                  <span class="backup-size">{{ backup.size }}</span>
+                  <mat-chip class="backup-type">{{ getTypeText(backup.type) }}</mat-chip>
+                </div>
+              </div>
+              
+              <div matListItemLine class="backup-actions">
+                @if (backup.status === 'completed') {
+                  <button mat-icon-button (click)="downloadBackup(backup)" matTooltip="İndir">
+                    <mat-icon>download</mat-icon>
+                  </button>
+                }
+                <button mat-icon-button color="warn" (click)="deleteBackup(backup.id)" matTooltip="Sil">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+          }
+        </mat-list>
+        
+        @if (backupHistory().length === 0) {
+          <div class="no-backups">
+            <mat-icon>backup</mat-icon>
+            <h3>Henüz yedek alınmamış</h3>
+            <p>İlk yedeğinizi almak için yukarıdaki butonu kullanın.</p>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

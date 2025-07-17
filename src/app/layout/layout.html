@@ -1,0 +1,73 @@
+<div class="app-layout">
+  <!-- Header -->
+  <mat-toolbar color="primary" class="app-header">
+    <button mat-icon-button (click)="toggleSidebar()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-icon class="app-icon">point_of_sale</mat-icon>
+    <span class="app-title">OTC Satış Yönetimi</span>
+    
+    <span class="header-spacer"></span>
+    
+    <!-- Notifications -->
+    <button mat-icon-button [matBadge]="notifications().length" 
+            matBadgeColor="warn" [matBadgeHidden]="notifications().length === 0">
+      <mat-icon>notifications</mat-icon>
+    </button>
+    
+    <!-- User Menu -->
+    <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu">
+      <mat-icon>account_circle</mat-icon>
+      <span>{{ currentUser().name }}</span>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item>
+        <mat-icon>person</mat-icon>
+        <span>Profil</span>
+      </button>
+      <button mat-menu-item>
+        <mat-icon>settings</mat-icon>
+        <span>Ayarlar</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Çıkış Yap</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar>
+
+  <!-- Main Container -->
+  <mat-sidenav-container class="app-container">
+    <!-- Sidebar -->
+    <mat-sidenav #sidenav mode="side" [opened]="sidebarOpen()" class="app-sidenav">
+      <app-sidebar></app-sidebar>
+    </mat-sidenav>
+
+    <!-- Main Content -->
+    <mat-sidenav-content class="app-content">
+      <div class="content-wrapper">
+        <!-- Sol İçerik - Router Outlet -->
+        <div class="left-content">
+          <router-outlet></router-outlet>
+        </div>
+
+        <!-- Sağ Panel - Sipariş Detayları -->
+        <div class="right-panel">
+          <app-order-panel 
+            [currentOrder]="currentOrder()"
+            [cart]="cart()"
+            [cartTotal]="cartTotal()"
+            [cartItemCount]="cartItemCount()"
+            (quantityChanged)="updateQuantity($event.productId, $event.change)"
+            (itemRemoved)="removeFromCart($event)"
+            (orderCompleted)="completeOrder($event)"
+            (orderCancelled)="cancelOrder()">
+          </app-order-panel>
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

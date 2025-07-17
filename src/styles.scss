@@ -1,1 +1,257 @@
-/* You can add global styles to this file, and also import other style files */
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use "@angular/material" as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+} /* You can add global styles to this file, and also import other style files */
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+// Global styles
+.mat-mdc-card {
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mat-mdc-button {
+  border-radius: 8px !important;
+}
+
+.mat-mdc-raised-button {
+  border-radius: 8px !important;
+}
+
+.mat-mdc-form-field {
+  .mat-mdc-form-field-flex {
+    border-radius: 8px !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+
+  &:hover {
+    background: #999;
+  }
+}
+
+// Animations
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .dashboard-page {
+    .summary-cards {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .dashboard-content {
+      grid-template-columns: 1fr;
+
+      .left-column,
+      .right-column {
+        max-height: 400px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .barcode-scanner-card {
+    .scanner-container {
+      flex-direction: column;
+      gap: 12px;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+
+  .product-grid-card {
+    .products-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .order-panel-card {
+    .payment-actions {
+      flex-direction: row;
+      gap: 8px;
+
+      button {
+        flex: 1;
+
+        &[color="warn"] {
+          flex: 1;
+        }
+      }
+    }
+  }
+  .settings-page {
+    .settings-content {
+      .settings-section {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .toggle-settings {
+          .setting-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+
+            mat-slide-toggle {
+              margin-left: 0;
+              align-self: flex-end;
+            }
+          }
+        }
+      }
+
+      .action-buttons {
+        flex-direction: column;
+
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  .users-page {
+    .page-header {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 16px;
+
+      .header-actions {
+        button {
+          width: 100%;
+        }
+      }
+    }
+
+    .users-table {
+      .action-buttons {
+        flex-direction: column;
+        gap: 2px;
+
+        button {
+          width: 32px;
+          height: 32px;
+        }
+      }
+    }
+  }
+
+  .backup-page {
+    .backup-content {
+      .backup-status-card {
+        .status-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .manual-backup-card {
+        .backup-actions {
+          button {
+            display: flex;
+            width: 100%;
+            margin: 4px 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .settings-page,
+  .users-page,
+  .backup-page {
+    .setting-item,
+    .status-item {
+      background: #424242;
+      
+      h4,
+      .status-label {
+        color: #fff;
+      }
+      
+      p,
+      .status-value {
+        color: #ccc;
+      }
+    }
+    
+    .user-info {
+      .user-name {
+        color: #fff;
+      }
+    }
+  }
+}

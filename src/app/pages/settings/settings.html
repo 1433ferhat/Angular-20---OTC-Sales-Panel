@@ -1,0 +1,99 @@
+<div class="settings-page">
+  <mat-card class="page-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>settings</mat-icon>
+        Genel Ayarlar
+      </mat-card-title>
+      <mat-card-subtitle>Sistem ayarlarını yönetin</mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <div class="settings-content">
+    <!-- Mağaza Ayarları -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>store</mat-icon>
+          Mağaza Bilgileri
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Mağaza Adı</mat-label>
+            <input matInput [(ngModel)]="storeName">
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Adres</mat-label>
+            <textarea matInput [(ngModel)]="storeAddress" rows="3"></textarea>
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Vergi Oranı (%)</mat-label>
+            <input matInput type="number" [(ngModel)]="taxRate">
+          </mat-form-field>
+          
+          <mat-form-field appearance="outline">
+            <mat-label>Para Birimi</mat-label>
+            <mat-select [(ngModel)]="currency">
+              <mat-option value="TRY">Türk Lirası (₺)</mat-option>
+              <mat-option value="USD">Amerikan Doları ($)</mat-option>
+              <mat-option value="EUR">Euro (€)</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sistem Ayarları -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>tune</mat-icon>
+          Sistem Ayarları
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="toggle-settings">
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4>Otomatik Yedekleme</h4>
+              <p>Günlük otomatik yedekleme yapılsın</p>
+            </div>
+            <mat-slide-toggle [(ngModel)]="autoBackup"></mat-slide-toggle>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4>Bildirimler</h4>
+              <p>Sistem bildirimleri gösterilsin</p>
+            </div>
+            <mat-slide-toggle [(ngModel)]="notifications"></mat-slide-toggle>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h4>Karanlık Mod</h4>
+              <p>Koyu tema kullanılsın</p>
+            </div>
+            <mat-slide-toggle [(ngModel)]="darkMode"></mat-slide-toggle>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Kaydet Butonları -->
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="saveSettings()">
+        <mat-icon>save</mat-icon>
+        Kaydet
+      </button>
+      <button mat-button color="warn" (click)="resetSettings()">
+        <mat-icon>refresh</mat-icon>
+        Sıfırla
+      </button>
+    </div>
+  </div>
+</div>

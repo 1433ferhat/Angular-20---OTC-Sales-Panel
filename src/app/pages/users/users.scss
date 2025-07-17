@@ -1,0 +1,87 @@
+.users-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  
+  .page-header {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    mat-card-header {
+      flex: 1;
+      
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        mat-icon {
+          color: #4caf50;
+        }
+      }
+    }
+    
+    .header-actions {
+      button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+  }
+  
+  .users-table-card {
+    flex: 1;
+    overflow: hidden;
+    
+    mat-card-content {
+      height: 100%;
+      overflow: auto;
+      padding: 0;
+    }
+    
+    .users-table {
+      width: 100%;
+      
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        
+        .user-avatar {
+          mat-icon {
+            font-size: 32px;
+            width: 32px;
+            height: 32px;
+            color: #666;
+          }
+        }
+        
+        .user-name {
+          font-weight: 500;
+          color: #333;
+        }
+      }
+      
+      .action-buttons {
+        display: flex;
+        gap: 4px;
+        
+        button {
+          width: 36px;
+          height: 36px;
+          line-height: 36px;
+        }
+      }
+      
+      mat-chip {
+        font-size: 12px;
+        height: 24px;
+        line-height: 24px;
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+.orders-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  
+  .page-header {
+    flex-shrink: 0;
+    
+    mat-card-header {
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        mat-icon {
+          color: #9c27b0;
+        }
+      }
+    }
+  }
+}
