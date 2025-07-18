@@ -1,4 +1,14 @@
-import { Component, Output, EventEmitter, ViewChild, ElementRef, ChangeDetectionStrategy, ViewEncapsulation, signal, inject } from '@angular/core';
+import {
+  Component,
+  Output,
+  EventEmitter,
+  ViewChild,
+  ElementRef,
+  ChangeDetectionStrategy,
+  ViewEncapsulation,
+  signal,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,6 +18,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { ProductModel } from '@shared/models/product.model';
 import { ProductStore } from '@shared/stores/product.store';
+import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-barcode-scanner',
@@ -16,16 +27,38 @@ import { ProductStore } from '@shared/stores/product.store';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatCardModule, MatIconModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+  ],
 })
 export default class BarcodeScanner {
   @ViewChild('barcodeInput') barcodeInput!: ElementRef<HTMLInputElement>;
   @Output() productFound = new EventEmitter<ProductModel>();
 
   private productStore = inject(ProductStore);
-  
+
+  private barcodeBuffer = '';
+
   barcode = signal<string>('');
   searchResults = signal<ProductModel[]>([]);
+
+  // @HostListener('document:keydown', ['$event'])
+  // onGlobalKeyDown(event: KeyboardEvent) {
+  //   // Sadece sayı tuşları ve Enter kabul et
+  //   if (/^[0-9]$/.test(event.key)) {
+  //     this.barcodeBuffer += event.key;
+  //   } else if (event.key === 'Enter' && this.barcodeBuffer.length > 0) {
+  //     this.barcode.set(this.barcodeBuffer);
+  //     this.searchProduct();
+  //     this.barcodeBuffer = '';
+  //   }
+  // }
 
   ngAfterViewInit() {
     setTimeout(() => this.barcodeInput?.nativeElement.focus(), 100);

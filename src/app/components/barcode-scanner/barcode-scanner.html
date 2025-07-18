@@ -5,20 +5,16 @@
       Barkod Okutma
     </mat-card-title>
   </mat-card-header>
-  
+
   <mat-card-content>
     <div class="scanner-container">
       <mat-form-field appearance="outline" class="barcode-input">
         <mat-label>Barkod veya Ürün Adı</mat-label>
-        <input matInput 
-               #barcodeInput
-               [(ngModel)]="barcode"
-               (keydown)="onKeyDown($event)"
-               placeholder="Barkod okutun..."
-               autocomplete="off">
+        <input matInput #barcodeInput [(ngModel)]="barcode" (keydown)="onKeyDown($event)" placeholder="Barkod okutun..."
+          autocomplete="off">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
-      
+
       <button mat-raised-button color="primary" (click)="searchProduct()">
         <mat-icon>search</mat-icon>
         Ara
@@ -26,20 +22,27 @@
     </div>
 
     @if (searchResults().length > 1) {
-      <div class="search-results">
-        <h3>Arama Sonuçları</h3>
-        @for (product of searchResults(); track product.id) {
-          <div class="result-item" (click)="selectProduct(product)">
-            <div class="product-info">
-              <h4>{{ product.name }}</h4>
-              <p>{{ getProductBrand(product) }} - {{ getFirstBarcode(product) }}</p>
-            </div>
-            <div class="product-price">
-              <span>{{ getProductPrice(product) | currency:'TRY':'symbol':'1.2-2' }}</span>
-            </div>
-          </div>
-        }
+    <div class="search-results">
+      <h3>Arama Sonuçları</h3>
+      @for (product of searchResults(); track product.id) {
+      <div class="result-item">
+        <div class="product-info">
+          <h4>{{ product.name }}</h4>
+          <p>{{ getProductBrand(product) }} - {{ getFirstBarcode(product) }}</p>
+        </div>
+        <div class="product-price">
+          <span>{{ getProductPrice(product) | currency:'TRY':'symbol':'1.2-2' }}</span>
+        </div>
+        <div class="product-actions">
+          <button mat-raised-button color="primary" (click)="selectProduct(product)">
+            <mat-icon>add_shopping_cart</mat-icon>
+            Sepete Ekle
+          </button>
+        </div>
       </div>
+      }
+    </div>
     }
+
   </mat-card-content>
 </mat-card>

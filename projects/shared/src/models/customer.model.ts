@@ -3,6 +3,11 @@ export interface CustomerModel {
   name: string;
   phone: string;
   email: string;
+  eInvoice: boolean;
+  taxOffice: string;
+  taxNo: string;
+  isEInvoice: string;
+  tcNo: string;
 }
 
 export class InitialCustomer {
@@ -11,4 +16,3 @@ export class InitialCustomer {
   phone = '';
   email = '';
 }
-

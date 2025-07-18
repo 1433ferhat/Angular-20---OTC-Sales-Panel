@@ -30,6 +30,7 @@ html {
   font: var(--mat-sys-body-medium);
 } /* You can add global styles to this file, and also import other style files */
 
+
 html,
 body {
   height: 100%;
@@ -236,18 +237,18 @@ body {
     .setting-item,
     .status-item {
       background: #424242;
-      
+
       h4,
       .status-label {
         color: #fff;
       }
-      
+
       p,
       .status-value {
         color: #ccc;
       }
     }
-    
+
     .user-info {
       .user-name {
         color: #fff;

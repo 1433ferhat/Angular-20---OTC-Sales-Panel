@@ -18,7 +18,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import BarcodeScanner from '../../components/barcode-scanner/barcode-scanner';
-import ProductGrid from '../../components/product-grid/product-grid';
 import Layout from '../../layout/layout';
 import { ProductModel } from '@shared/models/product.model';
 
@@ -39,7 +38,6 @@ import { ProductModel } from '@shared/models/product.model';
     MatIconModule,
     MatSnackBarModule,
     BarcodeScanner,
-    ProductGrid,
   ],
 })
 export default class Home implements OnInit {

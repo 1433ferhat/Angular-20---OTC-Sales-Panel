@@ -1,10 +1,19 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  ViewEncapsulation,
+} from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { OrderItemModel } from '@shared/models/order-item.model';
 import { OrderModel } from '@shared/models/order.model';
+import { CustomerModel } from '@shared/models/customer.model';
+import { PaymentMethod } from '@shared/enums/payment-method.enum';
 
 @Component({
   selector: 'app-order-panel',
@@ -13,18 +22,32 @@ import { OrderModel } from '@shared/models/order.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, CurrencyPipe]
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    CurrencyPipe,
+  ],
 })
 export default class OrderPanel {
   @Input() currentOrder: OrderModel | null = null;
   @Input() cart: OrderItemModel[] = [];
   @Input() cartTotal: number = 0;
   @Input() cartItemCount: number = 0;
+  @Input() selectedCustomer: CustomerModel | null = null;
 
-  @Output() quantityChanged = new EventEmitter<{productId: string, change: number}>();
+  @Output() quantityChanged = new EventEmitter<{
+    productId: string;
+    change: number;
+  }>();
   @Output() itemRemoved = new EventEmitter<string>();
-  @Output() orderCompleted = new EventEmitter<'cash' | 'card'>();
+  @Output() orderCompleted = new EventEmitter<PaymentMethod>();
   @Output() orderCancelled = new EventEmitter<void>();
+  @Output() customerSelectionRequested = new EventEmitter<void>();
+
+  // Enum'u template'te kullanabilmek için
+  PaymentMethod = PaymentMethod;
 
   changeQuantity(itemId: string, change: number) {
     this.quantityChanged.emit({ productId: itemId, change });
@@ -34,12 +57,17 @@ export default class OrderPanel {
     this.itemRemoved.emit(itemId);
   }
 
-  completeOrder(paymentMethod: 'cash' | 'card') {
+  completeOrder(paymentMethod: PaymentMethod) {
+    if (!this.selectedCustomer) return;
     this.orderCompleted.emit(paymentMethod);
   }
 
   cancelOrder() {
     this.orderCancelled.emit();
+  }
+
+  selectCustomer() {
+    this.customerSelectionRequested.emit();
   }
 
   getItemName(item: OrderItemModel): string {
