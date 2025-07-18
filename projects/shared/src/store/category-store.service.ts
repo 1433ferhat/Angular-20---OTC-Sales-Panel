@@ -5,51 +5,32 @@ import { CategoryModel } from '../models/category.model';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CategoryStore {
   private http = inject(HttpClient);
 
   // Signals
-  private _categories = signal<CategoryModel[]>([]);
   private _selectedCategory = signal<string | null>(null);
-  private _loading = signal(false);
-  private _error = signal<string | null>(null);
-
-  // Computed signals
-  categories = computed(() => this._categories());
-  selectedCategory = computed(() => this._selectedCategory());
-  loading = computed(() => this._loading());
-  error = computed(() => this._error());
 
   // Resource for categories (Angular 20 approach)
   categoriesResource = resource({
-    loader: () =>
-      lastValueFrom(this.http.get<CategoryModel[]>('api/categories/getall')),
+    loader: () => lastValueFrom(this.http.get<CategoryModel[]>('api/categories/getall'))
   });
 
+  // Computed signals
+  categories = computed(() => this.categoriesResource.value() || []);
+  selectedCategory = computed(() => this._selectedCategory());
+  loading = computed(() => this.categoriesResource.isLoading());
+  error = computed(() => this.categoriesResource.error());
+
   constructor() {
-    this.loadCategories();
+    // Resource automatically loads on initialization
   }
 
   // Actions
   loadCategories() {
-    this._loading.set(true);
-    this._error.set(null);
-
     this.categoriesResource.reload();
-
-    this.categoriesResource.value().subscribe({
-      next: (categories) => {
-        this._categories.set(categories || []);
-        this._loading.set(false);
-      },
-      error: (error) => {
-        this._error.set('Kategoriler yüklenirken hata oluştu');
-        this._loading.set(false);
-        console.error('Category loading error:', error);
-      },
-    });
   }
 
   setSelectedCategory(categoryId: string | null) {
@@ -57,49 +38,40 @@ export class CategoryStore {
   }
 
   getCategoryById(id: string): CategoryModel | undefined {
-    return this._categories().find((c) => c.id === id);
-  }
-
-  getCategoryByCode(code: string): CategoryModel | undefined {
-    return this._categories().find((c) => c.code === code);
+    return this.categories().find(c => c.id === id);
   }
 
   searchCategories(query: string): CategoryModel[] {
     const searchTerm = query.toLowerCase();
-    return this._categories().filter(
-      (c) =>
-        c.name.toLowerCase().includes(searchTerm) ||
-        c.code.toLowerCase().includes(searchTerm)
+    return this.categories().filter(c => 
+      c.name.toLowerCase().includes(searchTerm)
     );
   }
 
   updateCategory(category: CategoryModel) {
-    const categories = this._categories();
-    const index = categories.findIndex((c) => c.id === category.id);
-
-    if (index !== -1) {
-      const updatedCategories = [...categories];
-      updatedCategories[index] = category;
-      this._categories.set(updatedCategories);
-    }
+    // API çağrısı yapıp sonra reload
+    this.http.put(`api/categories/${category.id}`, category).subscribe({
+      next: () => this.loadCategories(),
+      error: (error) => console.error('Category update error:', error)
+    });
   }
 
   // Hierarchy helpers
   getParentCategories(): CategoryModel[] {
-    return this._categories().filter((c) => !c.parentId);
+    return this.categories().filter(c => !c.parentId);
   }
 
   getChildCategories(parentId: string): CategoryModel[] {
-    return this._categories().filter((c) => c.parentId === parentId);
+    return this.categories().filter(c => c.parentId === parentId);
   }
 
   getCategoryHierarchy(): CategoryModel[] {
-    const categories = this._categories();
-    const parentCategories = categories.filter((c) => !c.parentId);
-
-    return parentCategories.map((parent) => ({
+    const categories = this.categories();
+    const parentCategories = categories.filter(c => !c.parentId);
+    
+    return parentCategories.map(parent => ({
       ...parent,
-      children: categories.filter((c) => c.parentId === parent.id),
+      children: categories.filter(c => c.parentId === parent.id)
     }));
   }
 }
