@@ -143,12 +143,12 @@ export class ProductStore {
 
   // Barcode helpers
   getProductBarcodes(product: ProductModel): string[] {
-    return product.barcodes?.map((b) => b.barcode) || [];
+    return product.barcodes?.map((b) => b.value) || [];
   }
 
   getProductByAnyBarcode(barcodes: string[]): ProductModel | undefined {
     return this.products().find((p) =>
-      p.barcodes?.some((b) => barcodes.includes(b.barcode))
+      p.barcodes?.some((b) => barcodes.includes(b.value))
     );
   }
 }
