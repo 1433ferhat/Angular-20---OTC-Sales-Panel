@@ -1,3 +1,4 @@
+// src/app/pages/orders/orders.ts
 import {
   Component,
   ChangeDetectionStrategy,
@@ -25,7 +26,8 @@ import { OrderModel } from '@shared/models/order.model';
 export default class Orders {
   private layout = inject(Layout);
 
-  orders = computed(() => this.layout.orderHistory());
+  // 'orderHistory' yerine 'orders' kullanılmalı
+  orders = computed(() => this.layout.orders());
 
   onOrderSelected(order: OrderModel) {
     this.layout.viewOrderDetails(order);

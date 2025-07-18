@@ -110,14 +110,15 @@ export class OrderStore {
       const order: Partial<OrderModel> = {
         ...orderData,
         items: this._cartItems(),
-        totalQuantity: this.cartTotal(),
+        totalPrice: this.cartTotal(),
+        totalQuantity: this.cartItemCount(),
         orderDate: new Date(),
         status: OrderStatus.Pending,
       };
 
-      const response = await this.http
-        .post<OrderModel>('api/orders/create', order)
-        .toPromise();
+      const response = await lastValueFrom(
+        this.http.post<OrderModel>('api/orders/create', order)
+      );
 
       if (response) {
         this.loadOrders(); // Reload orders after creation
@@ -134,9 +135,9 @@ export class OrderStore {
 
   async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
     try {
-      const response = await this.http
-        .put<OrderModel>(`api/orders/${orderId}/status`, { status })
-        .toPromise();
+      const response = await lastValueFrom(
+        this.http.put<OrderModel>(`api/orders/${orderId}/status`, { status })
+      );
 
       if (response) {
         this.loadOrders(); // Reload orders after update
@@ -160,6 +161,7 @@ export class OrderStore {
 
   getOrdersByDateRange(startDate: Date, endDate: Date): OrderModel[] {
     return this.orders().filter((o) => {
+      if (!o.orderDate) return false;
       const orderDate = new Date(o.orderDate);
       return orderDate >= startDate && orderDate <= endDate;
     });
@@ -169,7 +171,7 @@ export class OrderStore {
   getTotalSales(): number {
     return this.orders().reduce(
       (total, order) =>
-        total + order.items.reduce((sum, item) => sum + item.quantity, 0),
+        total + order.items.reduce((sum, item) => sum + item.totalPrice, 0),
       0
     );
   }

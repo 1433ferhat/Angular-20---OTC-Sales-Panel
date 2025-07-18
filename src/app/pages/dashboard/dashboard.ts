@@ -1,5 +1,17 @@
-import { Component, ChangeDetectionStrategy, ViewEncapsulation, computed, inject } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+// src/app/pages/dashboard/dashboard.ts
+import {
+  Component,
+  ChangeDetectionStrategy,
+  ViewEncapsulation,
+  computed,
+  inject,
+} from '@angular/core';
+import {
+  CommonModule,
+  CurrencyPipe,
+  DatePipe,
+  DecimalPipe,
+} from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,16 +31,26 @@ import Layout from '../../layout/layout';
     MatIconModule,
     CurrencyPipe,
     DatePipe,
-  ]
+  ],
 })
 export default class Dashboard {
   private layout = inject(Layout);
 
+  // Layout'tan doğru computed signal'ları kullan
   todaysSales = computed(() => this.layout.todaysSales());
   lowStockProducts = computed(() => this.layout.lowStockProducts());
 
   getTodaysOrderCount(): number {
-    return 24; // Mock data
+    // Gerçek veri için layout'tan günlük siparişleri hesapla
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return this.layout.orders().filter((order) => {
+      if (!order.orderDate) return false;
+      const orderDate = new Date(order.orderDate);
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === today.getTime();
+    }).length;
   }
 
   getTotalProducts(): number {
@@ -36,10 +58,33 @@ export default class Dashboard {
   }
 
   getRecentActivities() {
-    return [
-      { id: 1, type: 'sale', icon: 'shopping_cart', message: 'Vitamin D3 satışı yapıldı', time: new Date() },
-      { id: 2, type: 'stock', icon: 'inventory', message: 'Omega-3 stok girişi', time: new Date() },
-      { id: 3, type: 'order', icon: 'receipt', message: 'Sipariş #ORD-123 tamamlandı', time: new Date() }
-    ];
+    // Gerçek verilerden son aktiviteleri al
+    const recentOrders = this.layout.recentOrders();
+    const activities: any[] = [];
+
+    // Son siparişlerden aktivite oluştur
+    recentOrders.forEach((order) => {
+      activities.push({
+        id: `order-${order.id}`,
+        type: 'order',
+        icon: 'receipt',
+        message: `Sipariş #${order.documentNumber} tamamlandı`,
+        time: order.orderDate || new Date(),
+      });
+    });
+
+    // Düşük stok uyarılarından aktivite oluştur
+    const lowStock = this.lowStockProducts().slice(0, 3);
+    lowStock.forEach((product) => {
+      activities.push({
+        id: `stock-${product.id}`,
+        type: 'stock',
+        icon: 'warning',
+        message: `${product.name} stoğu azaldı (${product.stock || 0})`,
+        time: new Date(),
+      });
+    });
+
+    return activities.slice(0, 5); // Son 5 aktiviteyi göster
   }
 }

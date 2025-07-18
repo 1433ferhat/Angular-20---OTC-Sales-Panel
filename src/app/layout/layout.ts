@@ -26,6 +26,8 @@ import { CategoryStore } from '@shared/stores/category.store';
 import { ProductModel } from '@shared/models/product.model';
 import { OrderModel } from '@shared/models/order.model';
 import { CustomerModel } from '@shared/models/customer.model';
+import { OrderStatus } from '@shared/enums/order-status.enum';
+import { PaymentMethod } from '@shared/enums/payment-method.enum';
 
 @Component({
   selector: 'app-layout',
@@ -88,6 +90,21 @@ export default class Layout implements OnInit {
     this.orderStore.orders().slice(0, 5)
   );
 
+  // Today's sales calculation
+  todaysSales = computed(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return this.orderStore.orders()
+      .filter(order => {
+        if (!order.orderDate) return false;
+        const orderDate = new Date(order.orderDate);
+        orderDate.setHours(0, 0, 0, 0);
+        return orderDate.getTime() === today.getTime();
+      })
+      .reduce((total, order) => total + order.totalPrice, 0);
+  });
+
   ngOnInit() {
     // Initial data is loaded automatically by stores
     console.log('Layout initialized');
@@ -114,23 +131,44 @@ export default class Layout implements OnInit {
   }
 
   async completeOrder() {
-    
-    const customer:CustomerModel=...localStorage.getItem("");
-    
-    const orderData:OrderModel = {
-      items:orderIt;
-        totalPrice:number;
-        totalQuantity:number;
-        status:OrderStatus;
-        paymentMethod: PaymentMethod;
-    };
+    try {
+      // Get customer data (you can implement proper customer selection)
+      const customer: CustomerModel = {
+        id: 'default-customer',
+        name: 'Müşteri',
+        email: '',
+        phone: ''
+      };
+      
+      const cartItems = this.cartItems();
+      if (cartItems.length === 0) {
+        this.showNotification('Sepet boş!', 'error');
+        return;
+      }
 
-    const order = await this.orderStore.createOrder(orderData);
-    
-    if (order) {
-      this.showNotification('Sipariş başarıyla tamamlandı');
-      this.toggleOrderPanel();
-    } else {
+      const orderData: Partial<OrderModel> = {
+        id: crypto.randomUUID(),
+        documentNumber: `ORD-${Date.now()}`,
+        customerId: customer.id,
+        customer: customer,
+        items: cartItems,
+        totalPrice: this.cartTotal(),
+        totalQuantity: this.cartItemCount(),
+        status: OrderStatus.Pending,
+        paymentMethod: PaymentMethod.Cash,
+        orderDate: new Date()
+      };
+
+      const order = await this.orderStore.createOrder(orderData);
+      
+      if (order) {
+        this.showNotification('Sipariş başarıyla tamamlandı');
+        this.toggleOrderPanel();
+      } else {
+        this.showNotification('Sipariş tamamlanırken hata oluştu', 'error');
+      }
+    } catch (error) {
+      console.error('Order completion error:', error);
       this.showNotification('Sipariş tamamlanırken hata oluştu', 'error');
     }
   }
