@@ -6,6 +6,8 @@ import {
 import { provideRouter, withRouterConfig } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { endpointInterceptor } from '@shared/interceptors/endpoint-interceptor';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 import { routes } from './app.routes';
 

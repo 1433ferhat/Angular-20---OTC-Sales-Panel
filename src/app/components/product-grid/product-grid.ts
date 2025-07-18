@@ -1,9 +1,18 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  ViewEncapsulation,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { ColDef, GridReadyEvent, GridApi, GridOptions } from 'ag-grid-community';
 import { ProductModel } from '@shared/models/product.model';
+import { AgGridAngular } from 'ag-grid-angular';
 
 @Component({
   selector: 'app-product-grid',
@@ -12,43 +21,154 @@ import { ProductModel } from '@shared/models/product.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    AgGridAngular,
+  ],
 })
 export default class ProductGrid {
-  @Input() products = signal<ProductModel[]>([]);
+  @Input() products: ProductModel[] = [];
   @Output() productSelected = new EventEmitter<ProductModel>();
 
-  selectProduct(product: ProductModel) {
-    this.productSelected.emit(product);
-  }
+  private gridApi!: GridApi; // Bu satırı ekle
 
-  getCategoryIcon(categoryName?: string): string {
-    if (!categoryName) return 'category';
-    switch (categoryName.toLowerCase()) {
-      case 'vitamin': return 'medication';
-      case 'skincare': return 'face';
-      case 'supplement': return 'eco';
-      default: return 'category';
-    }
-  }
+  columnDefs: ColDef[] = [
+    {
+      headerName: 'Ürün Adı',
+      field: 'name',
+      filter: 'agTextColumnFilter',
+      sortable: true,
+      resizable: true,
+      flex: 2,
+      cellRenderer: (params: any) => {
+        const product = params.data;
+        return `
+          <div style="display: flex; flex-direction: column; padding: 4px 0;">
+            <div style="font-weight: 500; font-size: 14px;">${
+              product.name
+            }</div>
+            <div style="font-size: 12px; color: #666;">${
+              product.category?.name || 'Kategorisiz'
+            }</div>
+          </div>
+        `;
+      },
+    },
+    {
+      headerName: 'Barkod',
+      field: 'barcodes',
+      filter: 'agTextColumnFilter',
+      sortable: true,
+      resizable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data.barcodes?.[0]?.value || 'Barkod Yok';
+      },
+    },
+    {
+      headerName: 'Kategori',
+      field: 'category.name',
+      filter: 'agSetColumnFilter',
+      sortable: true,
+      resizable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data.category?.name || 'Kategorisiz';
+      },
+    },
+    {
+      headerName: 'Stok',
+      field: 'stock',
+      filter: 'agNumberColumnFilter',
+      sortable: true,
+      resizable: true,
+      flex: 1,
+      cellStyle: (params) => {
+        const stock = params.value || 0;
+        if (stock === 0) return { color: '#f44336', fontWeight: 'bold' };
+        if (stock < 10) return { color: '#ff9800', fontWeight: 'bold' };
+        return { color: '#4caf50', fontWeight: 'bold' };
+      },
+      valueFormatter: (params) => {
+        return `${params.value || 0} adet`;
+      },
+    },
+    {
+      headerName: 'Fiyat',
+      field: 'prices',
+      filter: 'agNumberColumnFilter',
+      sortable: true,
+      resizable: true,
+      flex: 1,
+      valueGetter: (params) => {
+        return params.data.prices?.[0]?.price || 0;
+      },
+      valueFormatter: (params) => {
+        return new Intl.NumberFormat('tr-TR', {
+          style: 'currency',
+          currency: 'TRY',
+        }).format(params.value);
+      },
+      cellStyle: { color: '#2e7d32', fontWeight: '500' },
+    },
+    {
+      headerName: 'İşlemler',
+      field: 'actions',
+      sortable: false,
+      filter: false,
+      resizable: false,
+      width: 150,
+      cellRenderer: (params: any) => {
+        const product = params.data;
+        const isOutOfStock = (product.stock || 0) === 0;
 
-  getFirstBarcode(product: ProductModel): string {
-    return product.barcodes?.[0]?.value || 'Barkod Yok';
-  }
+        return `
+          <button 
+            class="ag-action-button ${isOutOfStock ? 'disabled' : ''}"
+            onclick="window.addToCart('${product.id}')"
+            ${isOutOfStock ? 'disabled' : ''}>
+            <span class="material-icons">add_shopping_cart</span>
+            Sepete Ekle
+          </button>
+        `;
+      },
+    },
+  ];
 
-  getProductPrice(product: ProductModel): number {
-    return product.prices?.[0]?.price || 0;
-  }
+  defaultColDef: ColDef = {
+    sortable: true,
+    filter: true,
+    resizable: true,
+    minWidth: 100,
+  };
 
-  getStockClass(stock: number): string {
-    if (stock === 0) return 'out-of-stock';
-    if (stock < 10) return 'low-stock';
-    return 'normal-stock';
-  }
+  // GridOptions tipini düzelt
+  gridOptions: GridOptions = {
+    pagination: true,
+    paginationPageSize: 20,
+    rowHeight: 60,
+    headerHeight: 50,
+    animateRows: true,
+    enableRangeSelection: true,
+    suppressRowClickSelection: true,
+    rowSelection: 'single', // Bu doğru
+  };
 
-  getStockIcon(stock: number): string {
-    if (stock === 0) return 'error';
-    if (stock < 10) return 'warning';
-    return 'check_circle';
+  onGridReady(params: GridReadyEvent) {
+    this.gridApi = params.api;
+
+    // Global addToCart fonksiyonu
+    (window as any).addToCart = (productId: string) => {
+      const product = this.products.find((p) => p.id === productId);
+      if (product) {
+        this.productSelected.emit(product);
+      }
+    };
+
+    // Grid'i otomatik boyutlandır
+    params.api.sizeColumnsToFit();
   }
 }

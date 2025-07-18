@@ -7,49 +7,14 @@
   </mat-card-header>
   
   <mat-card-content>
-    <div class="products-grid">
-      @for (product of products(); track product.id) {
-        <div class="product-item" 
-             [class.low-stock]="(product.stock || 0) < 10"
-             (click)="selectProduct(product)">
-          <div class="product-header">
-            <h3>{{ product.name }}</h3>
-            <mat-icon class="category-icon">{{ getCategoryIcon(product.category?.name) }}</mat-icon>
-          </div>
-          
-          <div class="product-details">
-            <p class="brand">{{ product.category?.name || 'Kategori Yok' }}</p>
-            <p class="barcode">{{ getFirstBarcode(product) }}</p>
-            <div class="stock-info">
-              <mat-icon [class]="getStockClass(product.stock || 0)">
-                {{ getStockIcon(product.stock || 0) }}
-              </mat-icon>
-              <span [class]="getStockClass(product.stock || 0)">
-                Stok: {{ product.stock || 0 }}
-              </span>
-            </div>
-          </div>
-          
-          <div class="product-footer">
-            <div class="price">
-              <span class="currency">₺</span>
-              <span class="amount">{{ getProductPrice(product).toFixed(2) }}</span>
-            </div>
-            <button mat-raised-button color="primary" (click)="selectProduct(product); $event.stopPropagation()">
-              <mat-icon>add_shopping_cart</mat-icon>
-              Sepete Ekle
-            </button>
-          </div>
-        </div>
-      }
-    </div>
-    
-    @if (products().length === 0) {
-      <div class="no-products">
-        <mat-icon>inventory</mat-icon>
-        <h3>Ürün bulunamadı</h3>
-        <p>Seçilen kategoride ürün mevcut değil.</p>
-      </div>
-    }
+    <ag-grid-angular
+      class="ag-theme-alpine"
+      [rowData]="products"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      [gridOptions]="gridOptions"
+      (gridReady)="onGridReady($event)"
+      style="height: 600px; width: 100%;">
+    </ag-grid-angular>
   </mat-card-content>
 </mat-card>

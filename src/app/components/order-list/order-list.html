@@ -4,8 +4,8 @@
   </mat-card-header>
   
   <mat-card-content>
-    @for (order of orders(); track order.id) {
-      <div class="order-item" (click)="selectOrder(order)">
+    @for (order of orders; track order.id) {
+      <div class="order-item" (click)="onOrderSelect(order)">
         <div class="order-header">
           <h3>{{ order.documentNumber || 'Sipariş #' + order.id }}</h3>
           <p class="order-date">{{ getOrderDate(order) | date:'dd.MM.yyyy HH:mm' }}</p>

@@ -12,6 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialogModule } from '@angular/material/dialog';
 import { UserModel } from '@shared/models/user.model';
+import { OperationClaimsModel } from '@shared/models/operation-claims.model';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
@@ -38,7 +39,9 @@ export default class Users {
       id: '1',
       name: 'Admin User',
       email: 'admin@example.com',
-      operationClaims: ['admin'],
+      operationClaims: [
+        { id: '1', name: 'admin' } as OperationClaimsModel // Düzeltme: string yerine OperationClaimsModel
+      ],
       status: 'active',
     },
   ]);
@@ -80,13 +83,13 @@ export default class Users {
     this.users.set(updatedUsers);
   }
 
-  getRoleText(role: string): string {
+  getRoleText(claim: OperationClaimsModel): string {
     const roles: any = {
       admin: 'Yönetici',
       cashier: 'Kasiyer',
       manager: 'Müdür',
     };
-    return roles[role] || role;
+    return roles[claim.name] || claim.name;
   }
 
   getStatusText(status: string): string {

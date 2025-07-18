@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,10 +17,10 @@ import { PaymentMethod } from '@shared/enums/payment-method.enum';
   imports: [CommonModule, MatCardModule, MatIconModule],
 })
 export default class OrderList {
-  @Input() orders = signal<OrderModel[]>([]);
+  @Input() orders: OrderModel[] = [];
   @Output() orderSelected = new EventEmitter<OrderModel>();
 
-  selectOrder(order: OrderModel) {
+  onOrderSelect(order: OrderModel) {
     this.orderSelected.emit(order);
   }
 
