@@ -5,6 +5,8 @@ import {
   ViewEncapsulation,
   signal,
   computed,
+  effect,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet } from '@angular/router';
@@ -21,6 +23,8 @@ import OrderPanel from '../components/order-panel/order-panel';
 import { ProductModel } from '@shared/models/product.model';
 import { OrderItemModel } from '@shared/models/order-item.model';
 import { OrderModel } from '@shared/models/order.model';
+import { ProductStore } from '@shared/store/product-store.service';
+import { AuthStore } from '@shared/store/auth-store.service';
 
 @Component({
   selector: 'app-layout',
@@ -45,13 +49,22 @@ import { OrderModel } from '@shared/models/order.model';
   ],
 })
 export default class Layout implements OnInit {
-  // Signals for state management
-  currentUser = signal({ name: 'Kasiyer Admin', role: 'cashier' });
+  readonly productStore = inject(ProductStore);
+  readonly products = this.productStore.products;
+  readonly lowStockProducts = this.productStore.lowStockProducts;
+
+  private auth = inject(AuthStore);
+  user = this.auth.currentUser;
+
+  ngOnInit() {
+    this.initializeOrder();
+    this.loadNotifications();
+  }
+
   notifications = signal<any[]>([]);
   cart = signal<OrderItemModel[]>([]);
   currentOrder = signal<OrderModel | null>(null);
   orderHistory = signal<OrderModel[]>([]);
-  products = signal<ProductModel[]>([]);
   sidebarOpen = signal<boolean>(true);
 
   // Computed values
@@ -73,94 +86,6 @@ export default class Layout implements OnInit {
       )
       .reduce((sum, order) => sum + order.total, 0);
   });
-
-  lowStockProducts = computed(() =>
-    this.products().filter((product) => product.stock < 10)
-  );
-
-  // Mock products data
-  mockProducts: ProductModel[] = [
-    {
-      id: 1,
-      name: 'Vitamin D3 2000 IU',
-      barcode: '8690131001',
-      category: 'vitamin',
-      price: 45.5,
-      brand: 'Solgar',
-      stock: 25,
-    },
-    {
-      id: 2,
-      name: 'Omega-3 Fish Oil',
-      barcode: '8690131002',
-      category: 'vitamin',
-      price: 89.9,
-      brand: 'Pharma Nord',
-      stock: 15,
-    },
-    {
-      id: 3,
-      name: 'Hyaluronic Acid Serum',
-      barcode: '8690131003',
-      category: 'skincare',
-      price: 125.0,
-      brand: 'The Ordinary',
-      stock: 8,
-    },
-    {
-      id: 4,
-      name: 'Probiyotik 30 Kapsül',
-      barcode: '8690131004',
-      category: 'supplement',
-      price: 67.75,
-      brand: 'Culturelle',
-      stock: 12,
-    },
-    {
-      id: 5,
-      name: 'Çinko Bisglisinat',
-      barcode: '8690131005',
-      category: 'vitamin',
-      price: 34.9,
-      brand: 'Thorne',
-      stock: 30,
-    },
-    {
-      id: 6,
-      name: 'Bebek Şampuanı',
-      barcode: '8690131006',
-      category: 'baby',
-      price: 28.5,
-      brand: "Johnson's",
-      stock: 20,
-    },
-    {
-      id: 7,
-      name: 'Dijital Termometre',
-      barcode: '8690131007',
-      category: 'medical',
-      price: 45.0,
-      brand: 'Braun',
-      stock: 5,
-    },
-    {
-      id: 8,
-      name: 'Vitamin C 1000mg',
-      barcode: '8690131008',
-      category: 'vitamin',
-      price: 52.3,
-      brand: 'Solgar',
-      stock: 18,
-    },
-  ];
-
-  constructor(private snackBar: MatSnackBar) {}
-
-  ngOnInit() {
-    this.products.set(this.mockProducts);
-    this.initializeOrder();
-    this.loadNotifications();
-  }
 
   toggleSidebar() {
     this.sidebarOpen.update((open) => !open);
@@ -297,6 +222,6 @@ export default class Layout implements OnInit {
   }
 
   logout() {
-    console.log('Çıkış yapılıyor...');
+    this.auth.clearUser();
   }
 }

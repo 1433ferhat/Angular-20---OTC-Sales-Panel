@@ -1,7 +1,7 @@
 export interface CategoryModel {
   id: string;
   name: string;
-  parentCategoryId?: string | null;
+  parentId?: string | null;
   parentCategory?: CategoryModel | null;
   subCategories?: CategoryModel[];
   products?: any[]; // İstersen ProductModel ile değiştir
@@ -15,7 +15,7 @@ export interface CategoryModel {
 export const initialCategory: CategoryModel = {
   id: '',
   name: '',
-  parentCategoryId: null,
+  parentId: null,
   parentCategory: null,
   subCategories: [],
   products: [],
