@@ -35,28 +35,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export default class Users {
   users = signal<UserModel[]>([
     {
-      id: 1,
+      id: '1',
       name: 'Admin User',
-      email: 'admin@otc.com',
-      role: 'admin',
+      email: 'admin@example.com',
+      operationClaims: ['admin'],
       status: 'active',
-      lastLogin: new Date(),
-    },
-    {
-      id: 2,
-      name: 'Kasiyer Ali',
-      email: 'ali@otc.com',
-      role: 'cashier',
-      status: 'active',
-      lastLogin: new Date(Date.now() - 86400000), // 1 day ago
-    },
-    {
-      id: 3,
-      name: 'Müdür Ayşe',
-      email: 'ayse@otc.com',
-      role: 'manager',
-      status: 'active',
-      lastLogin: new Date(Date.now() - 3600000), // 1 hour ago
     },
   ]);
 
@@ -77,11 +60,11 @@ export default class Users {
     console.log('Kullanıcı düzenle:', user);
   }
 
-  deleteUser(userId: number) {
+  deleteUser(userId: string) {
     console.log('Kullanıcı sil:', userId);
   }
 
-  toggleUserStatus(userId: number) {
+  toggleUserStatus(userId: string) {
     const userList = this.users();
     const updatedUsers = userList.map((user) =>
       user.id === userId

@@ -25,7 +25,6 @@
       </button>
     </div>
 
-    <!-- Search Results -->
     @if (searchResults().length > 1) {
       <div class="search-results">
         <h3>Arama Sonuçları</h3>
@@ -33,10 +32,10 @@
           <div class="result-item" (click)="selectProduct(product)">
             <div class="product-info">
               <h4>{{ product.name }}</h4>
-              <p>{{ product.brand }} - {{ product.barcode }}</p>
+              <p>{{ getProductBrand(product) }} - {{ getFirstBarcode(product) }}</p>
             </div>
             <div class="product-price">
-              <span>{{ product.price | currency:'TRY':'symbol':'1.2-2' }}</span>
+              <span>{{ getProductPrice(product) | currency:'TRY':'symbol':'1.2-2' }}</span>
             </div>
           </div>
         }

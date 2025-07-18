@@ -55,7 +55,7 @@ export default class Home implements OnInit {
     const category = this.selectedCategory();
     const products = this.layout.products();
     if (category === 'all') return products;
-    return products.filter((product) => product.category === category);
+    return products.filter((product) => product.categoryId === category);
   });
 
   ngOnInit() {

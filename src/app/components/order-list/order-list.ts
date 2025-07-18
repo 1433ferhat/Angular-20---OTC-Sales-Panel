@@ -1,12 +1,11 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation, signal, computed } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { OrderModel } from '@shared/models/order.model';
+import { OrderItemModel } from '@shared/models/order-item.model';
+import { OrderStatus } from '@shared/enums/order-status.enum';
+import { PaymentMethod } from '@shared/enums/payment-method.enum';
 
 @Component({
   selector: 'app-order-list',
@@ -15,49 +14,61 @@ import { OrderModel } from '@shared/models/order.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    CurrencyPipe,
-    DatePipe
-  ]
+  imports: [CommonModule, MatCardModule, MatIconModule],
 })
 export default class OrderList {
-  @Input() orders: OrderModel[] = [];
+  @Input() orders = signal<OrderModel[]>([]);
   @Output() orderSelected = new EventEmitter<OrderModel>();
-
-  selectedStatus = signal<string>('all');
-  
-  filteredOrders = computed(() => {
-    const status = this.selectedStatus();
-    if (status === 'all') return this.orders;
-    return this.orders.filter(o => o.status === status);
-  });
 
   selectOrder(order: OrderModel) {
     this.orderSelected.emit(order);
   }
 
-  getStatusIcon(status: string): string {
-    const icons:any = {
-      'pending': 'schedule',
-      'completed': 'check_circle',
-      'cancelled': 'cancel'
-    };
-    return icons[status] || 'help';
+  getOrderDate(order: OrderModel): Date {
+    return order.orderDate || new Date();
   }
 
-  getStatusText(status: string): string {
-    const texts:any = {
-      'pending': 'Bekleyen',
-      'completed': 'Tamamlandı',
-      'cancelled': 'İptal Edildi'
-    };
-    return texts[status] || 'Bilinmiyor';
+  getStatusIcon(status: OrderStatus): string {
+    switch (status) {
+      case OrderStatus.Pending: return 'pending';
+      case OrderStatus.Processing: return 'autorenew';
+      case OrderStatus.Shipped: return 'local_shipping';
+      case OrderStatus.Delivered: return 'check_circle';
+      case OrderStatus.Cancelled: return 'cancel';
+      default: return 'help';
+    }
+  }
+
+  getStatusText(status: OrderStatus): string {
+    switch (status) {
+      case OrderStatus.Pending: return 'Bekliyor';
+      case OrderStatus.Processing: return 'İşleniyor';
+      case OrderStatus.Shipped: return 'Kargoda';
+      case OrderStatus.Delivered: return 'Teslim Edildi';
+      case OrderStatus.Cancelled: return 'İptal Edildi';
+      default: return 'Bilinmeyen';
+    }
+  }
+
+  getItemName(item: OrderItemModel): string {
+    return item.product?.name || 'Bilinmeyen Ürün';
+  }
+
+  getPaymentIcon(paymentMethod?: PaymentMethod): string {
+    if (!paymentMethod) return 'payment';
+    switch (paymentMethod) {
+      case PaymentMethod.Cash: return 'payments';
+      case PaymentMethod.CreditCard: return 'credit_card';
+      default: return 'payment';
+    }
+  }
+
+  getPaymentText(paymentMethod?: PaymentMethod): string {
+    if (!paymentMethod) return 'Bilinmeyen';
+    switch (paymentMethod) {
+      case PaymentMethod.Cash: return 'Nakit';
+      case PaymentMethod.CreditCard: return 'Kredi Kartı';
+      default: return 'Bilinmeyen';
+    }
   }
 }

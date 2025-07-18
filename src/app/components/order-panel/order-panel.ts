@@ -13,13 +13,7 @@ import { OrderModel } from '@shared/models/order.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    CurrencyPipe
-  ]
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule, CurrencyPipe]
 })
 export default class OrderPanel {
   @Input() currentOrder: OrderModel | null = null;
@@ -27,17 +21,17 @@ export default class OrderPanel {
   @Input() cartTotal: number = 0;
   @Input() cartItemCount: number = 0;
 
-  @Output() quantityChanged = new EventEmitter<{productId: number, change: number}>();
-  @Output() itemRemoved = new EventEmitter<number>();
+  @Output() quantityChanged = new EventEmitter<{productId: string, change: number}>();
+  @Output() itemRemoved = new EventEmitter<string>();
   @Output() orderCompleted = new EventEmitter<'cash' | 'card'>();
   @Output() orderCancelled = new EventEmitter<void>();
 
-  changeQuantity(productId: number, change: number) {
-    this.quantityChanged.emit({ productId, change });
+  changeQuantity(itemId: string, change: number) {
+    this.quantityChanged.emit({ productId: itemId, change });
   }
 
-  removeItem(productId: number) {
-    this.itemRemoved.emit(productId);
+  removeItem(itemId: string) {
+    this.itemRemoved.emit(itemId);
   }
 
   completeOrder(paymentMethod: 'cash' | 'card') {
@@ -46,5 +40,17 @@ export default class OrderPanel {
 
   cancelOrder() {
     this.orderCancelled.emit();
+  }
+
+  getItemName(item: OrderItemModel): string {
+    return item.product?.name || 'Bilinmeyen Ürün';
+  }
+
+  getItemBrand(item: OrderItemModel): string {
+    return item.product?.category?.name || 'Bilinmeyen';
+  }
+
+  getItemBarcode(item: OrderItemModel): string {
+    return item.product?.barcodes?.[0]?.value || '';
   }
 }

@@ -1,77 +1,42 @@
 <mat-card class="order-list-card">
   <mat-card-header>
-    <mat-card-title>
-      <mat-icon>receipt_long</mat-icon>
-      Sipariş Geçmişi
-    </mat-card-title>
-    <mat-card-subtitle>Son siparişlerinizi görüntüleyin</mat-card-subtitle>
+    <mat-card-title>Sipariş Listesi</mat-card-title>
   </mat-card-header>
   
   <mat-card-content>
-    <div class="order-filters">
-      <mat-form-field appearance="outline">
-        <mat-label>Durum</mat-label>
-        <mat-select [(ngModel)]="selectedStatus">
-          <mat-option value="all">Tüm Siparişler</mat-option>
-          <mat-option value="pending">Bekleyen</mat-option>
-          <mat-option value="completed">Tamamlanan</mat-option>
-          <mat-option value="cancelled">İptal Edilen</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
-
-    <div class="orders-container">
-      @for (order of filteredOrders(); track order.id) {
-        <div class="order-item" 
-             [class]="'status-' + order.status"
-             (click)="selectOrder(order)">
-          <div class="order-header">
-            <div class="order-info">
-              <h4>{{ order.id }}</h4>
-              <p class="order-date">{{ order.date | date:'dd.MM.yyyy HH:mm' }}</p>
+    @for (order of orders(); track order.id) {
+      <div class="order-item" (click)="selectOrder(order)">
+        <div class="order-header">
+          <h3>{{ order.documentNumber || 'Sipariş #' + order.id }}</h3>
+          <p class="order-date">{{ getOrderDate(order) | date:'dd.MM.yyyy HH:mm' }}</p>
+        </div>
+        
+        <div class="order-status">
+          <mat-icon>{{ getStatusIcon(order.status) }}</mat-icon>
+          <span>{{ getStatusText(order.status) }}</span>
+        </div>
+        
+        <div class="order-items">
+          @for (item of order.items.slice(0, 3); track item.id) {
+            <div class="order-item-preview">
+              <span class="item-name">{{ getItemName(item) }}</span>
+              <span class="item-quantity">x{{ item.quantity }}</span>
             </div>
-            <div class="order-status">
-              <mat-icon [class]="'status-' + order.status">
-                {{ getStatusIcon(order.status) }}
-              </mat-icon>
-              <span [class]="'status-' + order.status">
-                {{ getStatusText(order.status) }}
-              </span>
-            </div>
+          }
+          @if (order.items.length > 3) {
+            <span class="more-items">+{{ order.items.length - 3 }} ürün daha</span>
+          }
+        </div>
+        
+        <div class="order-footer">
+          <div class="order-total">
+            <span class="total-amount">{{ order.totalPrice | currency:'TRY':'symbol':'1.2-2' }}</span>
           </div>
-          
-          <div class="order-details">
-            <div class="order-items">
-              <p>{{ order.items.length }} ürün</p>
-              <div class="item-preview">
-                @for (item of order.items.slice(0, 3); track item.id) {
-                  <span class="item-name">{{ item.name }}</span>
-                }
-                @if (order.items.length > 3) {
-                  <span class="more-items">+{{ order.items.length - 3 }} daha...</span>
-                }
-              </div>
-            </div>
-            
-            <div class="order-total">
-              <span class="total-amount">{{ order.total | currency:'TRY':'symbol':'1.2-2' }}</span>
-              @if (order.paymentMethod) {
-                <span class="payment-method">
-                  <mat-icon>{{ order.paymentMethod === 'cash' ? 'payments' : 'credit_card' }}</mat-icon>
-                  {{ order.paymentMethod === 'cash' ? 'Nakit' : 'Kart' }}
-                </span>
-              }
-            </div>
+          <div class="payment-method">
+            <mat-icon>{{ getPaymentIcon(order.paymentMethod) }}</mat-icon>
+            {{ getPaymentText(order.paymentMethod) }}
           </div>
         </div>
-      }
-    </div>
-    
-    @if (filteredOrders().length === 0) {
-      <div class="no-orders">
-        <mat-icon>receipt_long</mat-icon>
-        <h3>Sipariş bulunamadı</h3>
-        <p>Seçilen kriterlere uygun sipariş mevcut değil.</p>
       </div>
     }
   </mat-card-content>

@@ -1,12 +1,8 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ViewEncapsulation, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
 import { ProductModel } from '@shared/models/product.model';
 
 @Component({
@@ -16,51 +12,32 @@ import { ProductModel } from '@shared/models/product.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatFormFieldModule,
-    MatSelectModule
-  ]
+  imports: [CommonModule, MatCardModule, MatButtonModule, MatIconModule],
 })
 export default class ProductGrid {
-  @Input() products: ProductModel[] = [];
+  @Input() products = signal<ProductModel[]>([]);
   @Output() productSelected = new EventEmitter<ProductModel>();
-
-  selectedCategory = signal<string>('all');
-  
-  filteredProducts = computed(() => {
-    const category = this.selectedCategory();
-    if (category === 'all') return this.products;
-    return this.products.filter(p => p.category === category);
-  });
-
-  selectCategory(category: string) {
-    this.selectedCategory.set(category);
-  }
 
   selectProduct(product: ProductModel) {
     this.productSelected.emit(product);
   }
 
-  getCategoryCount(category: string): number {
-    return this.products.filter(p => p.category === category).length;
+  getCategoryIcon(categoryName?: string): string {
+    if (!categoryName) return 'category';
+    switch (categoryName.toLowerCase()) {
+      case 'vitamin': return 'medication';
+      case 'skincare': return 'face';
+      case 'supplement': return 'eco';
+      default: return 'category';
+    }
   }
 
-  getCategoryIcon(category: string): string {
-    const icons:any = {
-      'vitamin': 'medication',
-      'skincare': 'face',
-      'supplement': 'eco',
-      'hygiene': 'soap',
-      'baby': 'child_care',
-      'medical': 'medical_services'
-    };
-    return icons[category] || 'inventory';
+  getFirstBarcode(product: ProductModel): string {
+    return product.barcodes?.[0]?.value || 'Barkod Yok';
+  }
+
+  getProductPrice(product: ProductModel): number {
+    return product.prices?.[0]?.price || 0;
   }
 
   getStockClass(stock: number): string {
@@ -70,7 +47,7 @@ export default class ProductGrid {
   }
 
   getStockIcon(stock: number): string {
-    if (stock === 0) return 'block';
+    if (stock === 0) return 'error';
     if (stock < 10) return 'warning';
     return 'check_circle';
   }

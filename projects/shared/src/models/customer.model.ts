@@ -1,13 +1,14 @@
 export interface CustomerModel {
   id: string;
-  Name: string;
-  Phone: string;
-  Email: string;
+  name: string;
+  phone: string;
+  email: string;
 }
 
 export class InitialCustomer {
   id = '';
-  Name = '';
-  Phone = '';
-  Email = '';
+  name = '';
+  phone = '';
+  email = '';
 }
+

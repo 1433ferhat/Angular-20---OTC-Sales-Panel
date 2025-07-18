@@ -1,13 +1,4 @@
-import {
-  Component,
-  Output,
-  EventEmitter,
-  ViewChild,
-  ElementRef,
-  ChangeDetectionStrategy,
-  ViewEncapsulation,
-  signal,
-} from '@angular/core';
+import { Component, Output, EventEmitter, ViewChild, ElementRef, ChangeDetectionStrategy, ViewEncapsulation, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { ProductModel } from '@shared/models/product.model';
+import { ProductStore } from '@shared/stores/product.store';
 
 @Component({
   selector: 'app-barcode-scanner',
@@ -24,79 +16,26 @@ import { ProductModel } from '@shared/models/product.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-  ],
+  imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatCardModule, MatIconModule],
 })
 export default class BarcodeScanner {
   @ViewChild('barcodeInput') barcodeInput!: ElementRef<HTMLInputElement>;
   @Output() productFound = new EventEmitter<ProductModel>();
 
+  private productStore = inject(ProductStore);
+  
   barcode = signal<string>('');
   searchResults = signal<ProductModel[]>([]);
 
-  // Mock products - gerçek uygulamada service'den gelecek
-  products: ProductModel[] = [
-    {
-      id: 1,
-      name: 'Vitamin D3 2000 IU',
-      barcode: '8690131001',
-      category: 'vitamin',
-      price: 45.5,
-      brand: 'Solgar',
-      stock: 25,
-    },
-    {
-      id: 2,
-      name: 'Omega-3 Fish Oil',
-      barcode: '8690131002',
-      category: 'vitamin',
-      price: 89.9,
-      brand: 'Pharma Nord',
-      stock: 15,
-    },
-    {
-      id: 3,
-      name: 'Hyaluronic Acid Serum',
-      barcode: '8690131003',
-      category: 'skincare',
-      price: 125.0,
-      brand: 'The Ordinary',
-      stock: 8,
-    },
-    {
-      id: 4,
-      name: 'Probiyotik 30 Kapsül',
-      barcode: '8690131004',
-      category: 'supplement',
-      price: 67.75,
-      brand: 'Culturelle',
-      stock: 12,
-    },
-  ];
-
   ngAfterViewInit() {
-    setTimeout(() => {
-      this.barcodeInput?.nativeElement.focus();
-    }, 100);
+    setTimeout(() => this.barcodeInput?.nativeElement.focus(), 100);
   }
 
   searchProduct() {
     const barcodeValue = this.barcode().trim();
     if (!barcodeValue) return;
 
-    const results = this.products.filter(
-      (product) =>
-        product.barcode.includes(barcodeValue) ||
-        product.name.toLowerCase().includes(barcodeValue.toLowerCase())
-    );
-
+    const results = this.productStore.searchProducts(barcodeValue);
     this.searchResults.set(results);
 
     if (results.length === 1) {
@@ -112,8 +51,18 @@ export default class BarcodeScanner {
   }
 
   onKeyDown(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
-      this.searchProduct();
-    }
+    if (event.key === 'Enter') this.searchProduct();
+  }
+
+  getProductBrand(product: ProductModel): string {
+    return product.category?.name || 'Bilinmeyen';
+  }
+
+  getFirstBarcode(product: ProductModel): string {
+    return product.barcodes?.[0]?.value || '';
+  }
+
+  getProductPrice(product: ProductModel): number {
+    return product.prices?.[0]?.price || 0;
   }
 }

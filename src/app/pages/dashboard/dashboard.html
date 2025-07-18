@@ -13,7 +13,7 @@
         </div>
       </mat-card-content>
     </mat-card>
-    
+
     <mat-card class="summary-card orders">
       <mat-card-content>
         <div class="card-header">
@@ -26,7 +26,7 @@
         </div>
       </mat-card-content>
     </mat-card>
-    
+
     <mat-card class="summary-card products">
       <mat-card-content>
         <div class="card-header">
@@ -39,7 +39,7 @@
         </div>
       </mat-card-content>
     </mat-card>
-    
+
     <mat-card class="summary-card alerts">
       <mat-card-content>
         <div class="card-header">
@@ -68,25 +68,25 @@
         </mat-card-header>
         <mat-card-content>
           @if (lowStockProducts().length === 0) {
-            <div class="no-alerts">
-              <mat-icon>check_circle</mat-icon>
-              <p>Düşük stok uyarısı yok</p>
-            </div>
+          <div class="no-alerts">
+            <mat-icon>check_circle</mat-icon>
+            <p>Düşük stok uyarısı yok</p>
+          </div>
           } @else {
-            <div class="low-stock-list">
-              @for (product of lowStockProducts(); track product.id) {
-                <div class="low-stock-item">
-                  <div class="product-info">
-                    <h4>{{ product.name }}</h4>
-                    <p>{{ product.brand }}</p>
-                  </div>
-                  <div class="stock-amount" [class.critical]="product.stock < 5">
-                    <mat-icon>{{ product.stock < 5 ? 'error' : 'warning' }}</mat-icon>
+          <div class="low-stock-list">
+            @for (product of lowStockProducts(); track product.id) {
+            <div class="low-stock-item">
+              <div class="product-info">
+                <h4>{{ product.name }}</h4>
+                <p>{{ product.category?.name || 'Kategori Yok' }}</p>
+              </div>
+              <div class="stock-amount" [class.critical]="(product.stock || 0) < 5">
+                <mat-icon>{{ (product.stock || 0) < 5 ? 'error' : 'warning' }}</mat-icon>
                     <span>{{ product.stock }} adet</span>
-                  </div>
-                </div>
-              }
+              </div>
             </div>
+            }
+          </div>
           }
         </mat-card-content>
       </mat-card>
@@ -135,13 +135,13 @@
         <mat-card-content>
           <div class="activities-list">
             @for (activity of getRecentActivities(); track activity.id) {
-              <div class="activity-item">
-                <mat-icon [class]="activity.type">{{ activity.icon }}</mat-icon>
-                <div class="activity-content">
-                  <p>{{ activity.message }}</p>
-                  <small>{{ activity.time | date:'HH:mm' }}</small>
-                </div>
+            <div class="activity-item">
+              <mat-icon [class]="activity.type">{{ activity.icon }}</mat-icon>
+              <div class="activity-content">
+                <p>{{ activity.message }}</p>
+                <small>{{ activity.time | date:'HH:mm' }}</small>
               </div>
+            </div>
             }
           </div>
         </mat-card-content>

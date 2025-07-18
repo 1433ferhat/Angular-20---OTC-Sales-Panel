@@ -10,7 +10,7 @@
     <span class="header-spacer"></span>
     
     <!-- Notifications -->
-    <button mat-icon-button [matBadge]="notifications().length" 
+    <button mat-icon-button [matBadge]="notifications().length"
             matBadgeColor="warn" [matBadgeHidden]="notifications().length === 0">
       <mat-icon>notifications</mat-icon>
     </button>
@@ -57,13 +57,14 @@
         <!-- Sağ Panel - Sipariş Detayları -->
         <div class="right-panel">
           <app-order-panel 
+          
             [currentOrder]="currentOrder()"
-            [cart]="cart()"
+            [cart]="cartItems()"
             [cartTotal]="cartTotal()"
             [cartItemCount]="cartItemCount()"
             (quantityChanged)="updateQuantity($event.productId, $event.change)"
             (itemRemoved)="removeFromCart($event)"
-            (orderCompleted)="completeOrder($event)"
+            (orderCompleted)="completeOrder()"
             (orderCancelled)="cancelOrder()">
           </app-order-panel>
         </div>

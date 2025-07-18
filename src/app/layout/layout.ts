@@ -56,15 +56,14 @@ export default class Layout implements OnInit {
   private orderStore = inject(OrderStore);
   private categoryStore = inject(CategoryStore);
   private snackBar = inject(MatSnackBar);
-
   // Signals for state management
   currentUser = signal({
     name: 'Eczacı',
-    role: 'Admin'
+    role: 'Admin',
   });
 
   isOrderPanelOpen = signal(false);
-  
+
   // Computed signals from stores
   products = computed(() => this.productStore.products());
   categories = computed(() => this.categoryStore.categories());
@@ -72,31 +71,29 @@ export default class Layout implements OnInit {
   cartTotal = computed(() => this.orderStore.cartTotal());
   cartItemCount = computed(() => this.orderStore.cartItemCount());
   orders = computed(() => this.orderStore.orders());
-  
+
   // Loading states
-  isLoading = computed(() => 
-    this.productStore.loading() || 
-    this.orderStore.loading() || 
-    this.categoryStore.loading()
+  isLoading = computed(
+    () =>
+      this.productStore.loading() ||
+      this.orderStore.loading() ||
+      this.categoryStore.loading()
   );
 
   // Low stock products
-  lowStockProducts = computed(() => 
-    this.productStore.getLowStockProducts(10)
-  );
+  lowStockProducts = computed(() => this.productStore.getLowStockProducts(10));
 
   // Recent orders
-  recentOrders = computed(() => 
-    this.orderStore.orders().slice(0, 5)
-  );
+  recentOrders = computed(() => this.orderStore.orders().slice(0, 5));
 
   // Today's sales calculation
   todaysSales = computed(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    return this.orderStore.orders()
-      .filter(order => {
+
+    return this.orderStore
+      .orders()
+      .filter((order) => {
         if (!order.orderDate) return false;
         const orderDate = new Date(order.orderDate);
         orderDate.setHours(0, 0, 0, 0);
@@ -137,9 +134,9 @@ export default class Layout implements OnInit {
         id: 'default-customer',
         name: 'Müşteri',
         email: '',
-        phone: ''
+        phone: '',
       };
-      
+
       const cartItems = this.cartItems();
       if (cartItems.length === 0) {
         this.showNotification('Sepet boş!', 'error');
@@ -156,11 +153,11 @@ export default class Layout implements OnInit {
         totalQuantity: this.cartItemCount(),
         status: OrderStatus.Pending,
         paymentMethod: PaymentMethod.Cash,
-        orderDate: new Date()
+        orderDate: new Date(),
       };
 
       const order = await this.orderStore.createOrder(orderData);
-      
+
       if (order) {
         this.showNotification('Sipariş başarıyla tamamlandı');
         this.toggleOrderPanel();
@@ -204,10 +201,13 @@ export default class Layout implements OnInit {
   }
 
   // Notifications
-  private showNotification(message: string, type: 'success' | 'error' = 'success') {
+  private showNotification(
+    message: string,
+    type: 'success' | 'error' = 'success'
+  ) {
     this.snackBar.open(message, 'Kapat', {
       duration: 3000,
-      panelClass: type === 'error' ? 'error-snackbar' : 'success-snackbar'
+      panelClass: type === 'error' ? 'error-snackbar' : 'success-snackbar',
     });
   }
 
@@ -215,7 +215,7 @@ export default class Layout implements OnInit {
   formatPrice(price: number): string {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
-      currency: 'TRY'
+      currency: 'TRY',
     }).format(price);
   }
 
@@ -225,7 +225,7 @@ export default class Layout implements OnInit {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(new Date(date));
   }
 
@@ -255,5 +255,33 @@ export default class Layout implements OnInit {
 
   getOrdersCountByStatus(): Record<string, number> {
     return this.orderStore.getOrdersCountByStatus();
+  }
+  sidebarOpen = signal(true);
+
+  toggleSidebar() {
+    this.sidebarOpen.set(!this.sidebarOpen());
+  }
+  notifications = computed(() => {
+    const lowStock = this.lowStockProducts();
+    return lowStock.map((product) => ({
+      id: product.id,
+      message: `${product.name} stoğu azaldı`,
+      type: 'warning',
+    }));
+  });
+  logout() {
+    console.log('Logging out...');
+  }
+  currentOrder = computed(() => this.orderStore.currentOrder());
+  updateQuantity(productId: string, change: number) {
+    const item = this.cartItems().find((i) => i.productId === productId);
+    if (item) {
+      this.updateCartItemQuantity(item.id, item.quantity + change);
+    }
+  }
+
+  cancelOrder() {
+    this.clearCart();
+    this.isOrderPanelOpen.set(false);
   }
 }

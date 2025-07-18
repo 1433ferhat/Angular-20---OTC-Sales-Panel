@@ -1,7 +1,9 @@
-//projects\shared\src\models\user.model.ts
+import { OperationClaimsModel } from './operation-claims.model';
+
 export interface UserModel {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  operationClaims: string[];
+  operationClaims: OperationClaimsModel[];
+  status: string;
 }
