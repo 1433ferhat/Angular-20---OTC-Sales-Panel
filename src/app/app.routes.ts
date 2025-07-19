@@ -1,105 +1,111 @@
 // app.routes.ts
 import { Routes } from '@angular/router';
+import { authGuard } from './guard/auth-guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login'),
+  },
+  {
     path: '',
     loadComponent: () => import('./layout/layout'),
+    canActivate: [authGuard],
     children: [
-      { 
-        path: '', 
-        redirectTo: 'dashboard', 
-        pathMatch: 'full' 
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
       },
-      { 
-        path: 'dashboard', 
+      {
+        path: 'dashboard',
         loadComponent: () => import('./pages/dashboard/dashboard'),
-        title: 'Dashboard - OTC Satış'
+        title: 'Dashboard - OTC Satış',
       },
-      { 
-        path: 'sales', 
+      {
+        path: 'sales',
         loadComponent: () => import('./pages/home/home'),
-        title: 'Satış Yap - OTC Satış'
+        title: 'Satış Yap - OTC Satış',
       },
-      { 
-        path: 'quick-sales', 
+      {
+        path: 'quick-sales',
         loadComponent: () => import('./pages/home/home'),
-        title: 'Hızlı Satış - OTC Satış'
+        title: 'Hızlı Satış - OTC Satış',
       },
-      { 
-        path: 'price-check', 
+      {
+        path: 'price-check',
         loadComponent: () => import('./pages/home/home'),
-        title: 'Fiyat Sorgula - OTC Satış'
+        title: 'Fiyat Sorgula - OTC Satış',
       },
-      { 
-        path: 'create-order', 
+      {
+        path: 'create-order',
         loadComponent: () => import('./pages/orders/orders'),
-        title: 'Sipariş Oluştur - OTC Satış'
+        title: 'Sipariş Oluştur - OTC Satış',
       },
-      { 
-        path: 'orders', 
+      {
+        path: 'orders',
         loadComponent: () => import('./pages/orders/orders'),
-        title: 'Sipariş Listesi - OTC Satış'
+        title: 'Sipariş Listesi - OTC Satış',
       },
-      { 
-        path: 'pending-orders', 
+      {
+        path: 'pending-orders',
         loadComponent: () => import('./pages/orders/orders'),
-        title: 'Bekleyen Siparişler - OTC Satış'
+        title: 'Bekleyen Siparişler - OTC Satış',
       },
-      { 
-        path: 'inventory', 
+      {
+        path: 'inventory',
         loadComponent: () => import('./pages/inventory/inventory'),
-        title: 'Ürün Listesi - OTC Satış'
+        title: 'Ürün Listesi - OTC Satış',
       },
-      { 
-        path: 'stock-in', 
+      {
+        path: 'stock-in',
         loadComponent: () => import('./pages/inventory/inventory'),
-        title: 'Stok Girişi - OTC Satış'
+        title: 'Stok Girişi - OTC Satış',
       },
-      { 
-        path: 'stock-out', 
+      {
+        path: 'stock-out',
         loadComponent: () => import('./pages/inventory/inventory'),
-        title: 'Stok Çıkışı - OTC Satış'
+        title: 'Stok Çıkışı - OTC Satış',
       },
-      { 
-        path: 'stock-count', 
+      {
+        path: 'stock-count',
         loadComponent: () => import('./pages/inventory/inventory'),
-        title: 'Stok Sayımı - OTC Satış'
+        title: 'Stok Sayımı - OTC Satış',
       },
-      { 
-        path: 'reports', 
+      {
+        path: 'reports',
         loadComponent: () => import('./pages/reports/reports'),
-        title: 'Satış Raporları - OTC Satış'
+        title: 'Satış Raporları - OTC Satış',
       },
-      { 
-        path: 'stock-reports', 
+      {
+        path: 'stock-reports',
         loadComponent: () => import('./pages/reports/reports'),
-        title: 'Stok Raporları - OTC Satış'
+        title: 'Stok Raporları - OTC Satış',
       },
-      { 
-        path: 'financial-reports', 
+      {
+        path: 'financial-reports',
         loadComponent: () => import('./pages/reports/reports'),
-        title: 'Finansal Raporlar - OTC Satış'
+        title: 'Finansal Raporlar - OTC Satış',
       },
-      { 
-        path: 'settings', 
+      {
+        path: 'settings',
         loadComponent: () => import('./pages/settings/settings'),
-        title: 'Genel Ayarlar - OTC Satış'
+        title: 'Genel Ayarlar - OTC Satış',
       },
-      { 
-        path: 'users', 
+      {
+        path: 'users',
         loadComponent: () => import('./pages/users/users'),
-        title: 'Kullanıcı Yönetimi - OTC Satış'
+        title: 'Kullanıcı Yönetimi - OTC Satış',
       },
-      { 
-        path: 'backup', 
+      {
+        path: 'backup',
         loadComponent: () => import('./pages/backup/backup'),
-        title: 'Yedekleme - OTC Satış'
+        title: 'Yedekleme - OTC Satış',
       },
       {
         path: '**',
-        redirectTo: 'dashboard'
-      }
-    ]
-  }
+        redirectTo: 'dashboard',
+      },
+    ],
+  },
 ];

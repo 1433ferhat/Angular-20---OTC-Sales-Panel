@@ -3,10 +3,9 @@ export interface CustomerModel {
   name: string;
   phone: string;
   email: string;
-  eInvoice: boolean;
   taxOffice: string;
   taxNo: string;
-  isEInvoice: string;
+  isEInvoice: boolean;
   tcNo: string;
 }
 

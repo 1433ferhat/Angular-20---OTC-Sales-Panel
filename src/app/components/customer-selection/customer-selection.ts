@@ -36,7 +36,7 @@ export class CustomerSelectionComponent {
     name: '',
     phone: '',
     email: '',
-    eInvoice: true,
+    isEInvoice: true,
   };
 
   constructor(
@@ -45,7 +45,7 @@ export class CustomerSelectionComponent {
   ) {}
 
   onInvoiceTypeChange() {
-    if (this.customerData.eInvoice === true) {
+    if (this.customerData.isEInvoice === true) {
       this.customerData.taxOffice = undefined;
       this.customerData.taxNo = undefined;
       this.customerData.isEInvoice = undefined;
@@ -55,12 +55,12 @@ export class CustomerSelectionComponent {
   }
 
   isFormValid(): boolean {
-    const { name, phone, email, eInvoice, tcNo, taxOffice, taxNo } =
+    const { name, phone, email, isEInvoice, tcNo, taxOffice, taxNo } =
       this.customerData;
 
-    const basicValid = name && phone && email && eInvoice;
+    const basicValid = name && phone && email && isEInvoice;
 
-    if (eInvoice === true) {
+    if (isEInvoice === true) {
       return basicValid && tcNo && tcNo.length === 11 ? true : false;
     } else {
       return basicValid && taxOffice && taxNo && taxNo.length === 10

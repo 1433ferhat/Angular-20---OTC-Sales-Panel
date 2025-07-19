@@ -135,6 +135,10 @@ export default class Layout implements OnInit {
         name: 'Müşteri',
         email: '',
         phone: '',
+        isEInvoice: true,
+        taxNo: '',
+        taxOffice: '',
+        tcNo: '',
       };
 
       const cartItems = this.cartItems();

@@ -23,20 +23,20 @@
 
             <mat-form-field appearance="outline">
                 <mat-label>Fatura Türü *</mat-label>
-                <mat-select [(ngModel)]="customerData.invoiceType" (selectionChange)="onInvoiceTypeChange()">
+                <mat-select [(ngModel)]="customerData.isEInvoice" (selectionChange)="onInvoiceTypeChange()">
                     <mat-option value="individual">Bireysel</mat-option>
                     <mat-option value="corporate">Kurumsal</mat-option>
                 </mat-select>
             </mat-form-field>
 
-            @if (customerData.invoiceType === 'individual') {
+            @if (customerData.isEInvoice === true) {
             <mat-form-field appearance="outline">
                 <mat-label>T.C. Kimlik No *</mat-label>
                 <input matInput [(ngModel)]="customerData.tcNo" maxlength="11" required>
             </mat-form-field>
             }
 
-            @if (customerData.invoiceType === 'corporate') {
+            @if (customerData.isEInvoice === true) {
             <mat-form-field appearance="outline">
                 <mat-label>Vergi Dairesi *</mat-label>
                 <input matInput [(ngModel)]="customerData.taxOffice" required>
