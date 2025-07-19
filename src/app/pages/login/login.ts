@@ -69,6 +69,11 @@ export default class Login {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+
+    // Zaten giriş yapmışsa dashboard'a yönlendir
+    if (this.common.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   onSubmit(): void {
@@ -80,17 +85,19 @@ export default class Login {
 
       this.http.post<LoginResponse>('api/auth/login', credentials).subscribe({
         next: (response) => {
-          // Sadece token'ı kaydet
-          localStorage.setItem('token', response.accessToken.token);
-
-          // JWT'yi decode et ve user bilgilerini al
-          const userInfo = this.decodeAndSetUser(response.accessToken.token);
-          this.common.user.set(userInfo);
-
-          this.router.navigate(['/dashboard']);
+          try {
+            // Common service'deki loginSuccess metodunu kullan
+            this.common.loginSuccess(response.accessToken.token);
+            
+            // Dashboard'a yönlendir
+            this.router.navigate(['/dashboard']);
+          } catch (error) {
+            console.error('Login success handling error:', error);
+            this.errorMessage.set('Giriş işlemi başarılı ancak yönlendirme hatası oluştu.');
+          }
         },
         error: (error) => {
-          this.isLoading.set(false);
+          console.error('Login error:', error);
           this.errorMessage.set(
             error.error?.message || 'Giriş yapılırken bir hata oluştu.'
           );
@@ -106,19 +113,10 @@ export default class Login {
     this.hidePassword.set(!this.hidePassword());
   }
 
-  private decodeAndSetUser(token: string): any {
-    const decoded = this.common.decodeJWT(token);
-    return {
-      id: decoded?.sub || decoded?.userId,
-      name: decoded?.name || decoded?.given_name,
-      email: decoded?.email,
-      role: decoded?.role || decoded?.roles,
-      claims: decoded?.claims,
-      ...decoded,
-    };
-  }
-  const field = this.loginForm.get(fieldName);
-  
+  // Form field hatalarını göster
+  getFieldError(fieldName: string): string {
+    const field = this.loginForm.get(fieldName);
+    
     if (field?.errors && field.touched) {
       if (field.errors['required']) {
         return 'Bu alan gereklidir';
@@ -131,6 +129,5 @@ export default class Login {
       }
     }
     return '';
-
   }
 }

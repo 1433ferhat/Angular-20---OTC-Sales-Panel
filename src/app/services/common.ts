@@ -1,5 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { UserModel } from '@shared/models/user.model';
+import { OperationClaimsModel } from '@shared/models/operation-claims.model';
 
 @Injectable({
   providedIn: 'root'
@@ -7,45 +9,42 @@ import { Router } from '@angular/router';
 export class Common {
   private router = inject(Router);
   
-  user = signal<any | null>(null);
+  user = signal<UserModel | undefined>(undefined);
 
-  logout(): void {
-    localStorage.removeItem('response');
-    localStorage.removeItem('token');
-    this.user.set(null);
-    this.router.navigateByUrl('/login');
-  }
-
-  isAuthenticated(): boolean {
-    const res = localStorage.getItem('response');
-    if (!res) return false;
+  // Login başarılı olduğunda çağır
+  loginSuccess(token: string): void {
+    localStorage.setItem('token', token);
     
-    try {
-      const loginResponse = JSON.parse(res);
-      return !!(loginResponse.accessToken && loginResponse.accessToken.token);
-    } catch {
-      return false;
+    const userInfo = this.getUserFromToken();
+    if (userInfo) {
+      this.user.set(userInfo);
+      console.log('🟢 User login başarılı:', userInfo);
     }
   }
 
+  // Logout
+  logout(): void {
+    console.log('🔴 Logout yapılıyor...');
+    localStorage.removeItem('token');
+    localStorage.removeItem('response');
+    this.user.set(undefined);
+    console.log('🔴 Logout tamamlandı, login sayfasına yönlendiriliyor');
+    this.router.navigateByUrl('/login');
+  }
+
+  // Token var mı kontrol et
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('token');
+    return !!token;
+  }
+
+  // Token al
   getToken(): string | null {
     return localStorage.getItem('token');
   }
 
-  getUser(): any | null {
-    const res = localStorage.getItem('response');
-    if (!res) return null;
-    
-    try {
-      return JSON.parse(res);
-    } catch {
-      return null;
-    }
-  }
-
-  // JWT Token'ı decode et
+  // JWT decode et
   decodeJWT(token: string): any {
-    debugger;
     try {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -57,62 +56,61 @@ export class Common {
       );
       return JSON.parse(jsonPayload);
     } catch (error) {
-      console.error('JWT decode error:', error);
+      console.error('JWT decode hatası:', error);
       return null;
     }
   }
 
-  // Token'dan kullanıcı bilgilerini al
-  getUserFromToken(): any {
+  // Token'dan user bilgilerini al
+  getUserFromToken(): UserModel | undefined {
     const token = this.getToken();
-    if (!token) return null;
+    if (!token) return undefined;
     
     const decoded = this.decodeJWT(token);
-    if (!decoded) return null;
+    if (!decoded) return undefined;
 
-    // JWT'de yaygın kullanılan field'lar
-    return {
-      id: decoded.sub || decoded.userId || decoded.id,
-      name: decoded.name || decoded.given_name || decoded.username,
-      email: decoded.email,
-      role: decoded.role || decoded.roles,
-      claims: decoded.claims || decoded.permissions,
-      // JWT'deki diğer field'lar
-      ...decoded
-    };
-  }
-
-  // Kullanıcının belirli bir rolü var mı?
-  hasRole(role: string): boolean {
-    const user = this.getUserFromToken();
-    if (!user) return false;
-
-    // Role array olabilir veya string olabilir
-    if (Array.isArray(user.role)) {
-      return user.role.includes(role);
-    }
+    // Role'leri OperationClaims'e çevir
+    const operationClaims: OperationClaimsModel[] = [];
+    const roles = decoded.role || decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || [];
     
-    if (typeof user.role === 'string') {
-      return user.role === role;
+    if (Array.isArray(roles)) {
+      roles.forEach((roleName: string, index: number) => {
+        operationClaims.push({
+          id: `${index + 1}`,
+          name: roleName
+        });
+      });
     }
 
-    // Claims kontrolü (operationClaims gibi)
-    if (user.claims && Array.isArray(user.claims)) {
-      return user.claims.some((claim: any) => 
-        claim.name === role || claim === role
-      );
-    }
+    const user: UserModel = {
+      id: decoded.id || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || '',
+      name: decoded.name || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || '',
+      firstName: decoded.firstName || '',
+      lastName: decoded.lastName || '',
+      email: decoded.email || decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || '',
+      operationClaims: operationClaims,
+      status: 'active'
+    };
 
-    return false;
+    console.log('🟡 Token\'dan user bilgisi alındı:', user);
+    return user;
   }
 
-  // Kullanıcının belirli bir yetkisi var mı?
-  hasPermission(permission: string): boolean {
-    return this.hasRole(permission);
+  // Role kontrolü
+  hasRole(role: string): boolean {
+    const currentUser = this.user();
+    if (!currentUser) return false;
+    
+    return currentUser.operationClaims.some(claim => claim.name === role);
   }
 
   // Admin mi?
   isAdmin(): boolean {
-    return this.hasRole('admin') || this.hasRole('Admin');
+    return this.hasRole('Admin') || this.hasRole('Auth.Admin');
+  }
+
+  // Mevcut user'ı al
+  getCurrentUser(): UserModel | undefined {
+    return this.user();
   }
 }
