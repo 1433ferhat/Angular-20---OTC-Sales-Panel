@@ -1,67 +1,94 @@
 <div class="customer-dialog">
-    <h2 mat-dialog-title>
-        <mat-icon>person_add</mat-icon>
-        Müşteri Bilgileri
-    </h2>
+  <h2 mat-dialog-title>
+    <mat-icon>person_add</mat-icon>
+    Müşteri Bilgileri
+  </h2>
 
-    <mat-dialog-content>
-        <div class="form-grid">
-            <mat-form-field appearance="outline">
-                <mat-label>Ad Soyad *</mat-label>
-                <input matInput [(ngModel)]="customerData.name" required>
-            </mat-form-field>
+  <mat-dialog-content>
+    <div class="form-grid">
+      <!-- Temel Bilgiler -->
+      <mat-form-field appearance="outline">
+        <mat-label>Ad Soyad *</mat-label>
+        <input matInput [(ngModel)]="customerData.name" required>
+      </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Cep Telefonu *</mat-label>
-                <input matInput [(ngModel)]="customerData.phone" required>
-            </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Cep Telefonu *</mat-label>
+        <input matInput [(ngModel)]="customerData.phone" required>
+      </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>E-Posta *</mat-label>
-                <input matInput type="email" [(ngModel)]="customerData.email" required>
-            </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>E-Posta *</mat-label>
+        <input matInput type="email" [(ngModel)]="customerData.email" required>
+      </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Fatura Türü *</mat-label>
-                <mat-select [(ngModel)]="customerData.isEInvoice" (selectionChange)="onInvoiceTypeChange()">
-                    <mat-option value="individual">Bireysel</mat-option>
-                    <mat-option value="corporate">Kurumsal</mat-option>
-                </mat-select>
-            </mat-form-field>
+      <!-- Fiyat Tipi -->
+      <mat-form-field appearance="outline">
+        <mat-label>Fiyat Tipi *</mat-label>
+        <mat-select [(ngModel)]="customerData.priceType" required>
+          <mat-option *ngFor="let option of priceTypeOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-            @if (customerData.isEInvoice === true) {
-            <mat-form-field appearance="outline">
-                <mat-label>T.C. Kimlik No *</mat-label>
-                <input matInput [(ngModel)]="customerData.tcNo" maxlength="11" required>
-            </mat-form-field>
-            }
+      <!-- Müşteri Tipi -->
+      <div class="customer-type-section">
+        <label>Müşteri Tipi *</label>
+        <mat-radio-group [(ngModel)]="isCorporate" (change)="onCustomerTypeChange()">
+          <mat-radio-button [value]="false">Bireysel</mat-radio-button>
+          <mat-radio-button [value]="true">Kurumsal</mat-radio-button>
+        </mat-radio-group>
+      </div>
 
-            @if (customerData.isEInvoice === true) {
-            <mat-form-field appearance="outline">
-                <mat-label>Vergi Dairesi *</mat-label>
-                <input matInput [(ngModel)]="customerData.taxOffice" required>
-            </mat-form-field>
+      <!-- Bireysel Müşteri -->
+      @if (!isCorporate()) {
+        <mat-form-field appearance="outline">
+          <mat-label>T.C. Kimlik No *</mat-label>
+          <input matInput 
+                 [(ngModel)]="customerData.tcNo" 
+                 maxlength="11" 
+                 pattern="[0-9]*"
+                 required>
+          <mat-hint>11 haneli T.C. kimlik numarası</mat-hint>
+        </mat-form-field>
+      }
 
-            <mat-form-field appearance="outline">
-                <mat-label>Vergi Numarası *</mat-label>
-                <input matInput [(ngModel)]="customerData.taxNo" maxlength="10" required>
-            </mat-form-field>
+      <!-- Kurumsal Müşteri -->
+      @if (isCorporate()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Vergi Dairesi *</mat-label>
+          <input matInput [(ngModel)]="customerData.taxOffice" required>
+        </mat-form-field>
 
-            <mat-checkbox [(ngModel)]="customerData.isEInvoice">
-                E-Fatura Mükellefi
-            </mat-checkbox>
-            }
-        </div>
-    </mat-dialog-content>
+        <mat-form-field appearance="outline">
+          <mat-label>Vergi Numarası *</mat-label>
+          <input matInput 
+                 [(ngModel)]="customerData.taxNo" 
+                 maxlength="10"
+                 pattern="[0-9]*"
+                 required>
+          <mat-hint>10 haneli vergi numarası</mat-hint>
+        </mat-form-field>
+      }
 
-    <mat-dialog-actions>
-        <button mat-button (click)="onCancel()">
-            <mat-icon>close</mat-icon>
-            İptal
-        </button>
-        <button mat-raised-button color="primary" [disabled]="!isFormValid()" (click)="onConfirm()">
-            <mat-icon>check</mat-icon>
-            Onayla
-        </button>
-    </mat-dialog-actions>
+      <!-- E-Fatura -->
+      <div class="einvoice-section">
+        <mat-checkbox [(ngModel)]="customerData.isEInvoice" (change)="onEInvoiceChange()">
+          E-Fatura Mükellefi
+        </mat-checkbox>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button mat-button (click)="onCancel()">
+      <mat-icon>close</mat-icon>
+      İptal
+    </button>
+    <button mat-raised-button color="primary" [disabled]="!isFormValid()" (click)="onConfirm()">
+      <mat-icon>check</mat-icon>
+      Onayla
+    </button>
+  </mat-dialog-actions>
 </div>

@@ -183,4 +183,38 @@ export class OrderStore {
       return acc;
     }, {} as Record<string, number>);
   }
+  // Order completion
+  async completeOrder(customer: CustomerModel, paymentMethod: PaymentMethod): Promise<OrderModel | null> {
+    const cartItems = this._cartItems();
+    if (cartItems.length === 0) return null;
+
+    try {
+      const orderData: Partial<OrderModel> = {
+        id: crypto.randomUUID(),
+        documentNumber: `ORD-${Date.now()}`,
+        customerId: customer.id,
+        customer: customer,
+        items: cartItems,
+        totalPrice: this.cartTotal(),
+        totalQuantity: this.cartItemCount(),
+        status: OrderStatus.PENDING,
+        paymentMethod: paymentMethod,
+        orderDate: new Date(),
+      };
+
+      const response = await lastValueFrom(
+        this.http.post<OrderModel>('api/orders/create', orderData)
+      );
+
+      if (response) {
+        this.loadOrders();
+        this.clearCart();
+        return response;
+      }
+
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
 }

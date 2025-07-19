@@ -1,4 +1,3 @@
-// src/app/layout/layout.ts
 import {
   Component,
   OnInit,
@@ -18,8 +17,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import Sidebar from '../components/sidebar/sidebar';
 import OrderPanel from '../components/order-panel/order-panel';
+import { CustomerSelection } from '../components/customer-selection/customer-selection';
 import { ProductStore } from '@shared/stores/product.store';
 import { OrderStore } from '@shared/stores/order.store';
 import { CategoryStore } from '@shared/stores/category.store';
@@ -58,24 +59,27 @@ export default class Layout implements OnInit {
   private orderStore = inject(OrderStore);
   private categoryStore = inject(CategoryStore);
   private snackBar = inject(MatSnackBar);
-  readonly #auth = inject(AuthService);
-  // Signals for state management
-  currentUser = signal({
-    name: 'Eczacı',
-    role: 'Admin',
-  });
+  private common = inject(Common);
+  private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
+
+  currentUser = computed(() => this.common.getCurrentUser());
+  currentUserName = computed(() => this.common.getFullName() || 'Kullanıcı');
+  currentUserInitials = computed(() => this.common.getUserInitials());
+  isUserLoggedIn = computed(() => this.common.isLoggedIn());
 
   isOrderPanelOpen = signal(false);
+  sidebarOpen = signal(true);
+  selectedCustomer = signal<CustomerModel | null>(null);
 
-  // Computed signals from stores
   products = computed(() => this.productStore.products());
   categories = computed(() => this.categoryStore.categories());
   cartItems = computed(() => this.orderStore.cartItems());
   cartTotal = computed(() => this.orderStore.cartTotal());
   cartItemCount = computed(() => this.orderStore.cartItemCount());
   orders = computed(() => this.orderStore.orders());
+  currentOrder = computed(() => this.orderStore.currentOrder());
 
-  // Loading states
   isLoading = computed(
     () =>
       this.productStore.loading() ||
@@ -83,212 +87,152 @@ export default class Layout implements OnInit {
       this.categoryStore.loading()
   );
 
-  // Low stock products
   lowStockProducts = computed(() => this.productStore.getLowStockProducts(10));
-
-  // Recent orders
   recentOrders = computed(() => this.orderStore.orders().slice(0, 5));
 
-  // Today's sales calculation
   todaysSales = computed(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return this.orderStore
-      .orders()
-      .filter((order) => {
+    return this.orderStore.orders()
+      .filter(order => {
         if (!order.orderDate) return false;
         const orderDate = new Date(order.orderDate);
         orderDate.setHours(0, 0, 0, 0);
-        return orderDate.getTime() === today.getTime();
+        return orderDate.getTime() === today.getTime() && 
+               order.status === OrderStatus.COMPLETED;
       })
       .reduce((total, order) => total + order.totalPrice, 0);
   });
 
+  notifications = computed(() => {
+    const lowStock = this.lowStockProducts();
+    const pendingOrders = this.orderStore.orders().filter(
+      order => order.status === OrderStatus.PENDING
+    );
+
+    return [
+      ...lowStock.map(product => ({
+        id: `low-stock-${product.id}`,
+        type: 'warning' as const,
+        message: `${product.name} stoku düşük`
+      })),
+      ...pendingOrders.map(order => ({
+        id: `pending-order-${order.id}`,
+        type: 'info' as const,
+        message: `Bekleyen sipariş: ${order.id}`
+      }))
+    ];
+  });
+
   ngOnInit() {
-    // Initial data is loaded automatically by stores
-    console.log('Layout initialized');
+    this.authService.initializeUserFromToken();
+    this.loadInitialData();
   }
 
-  // Actions
-  addToCart(product: ProductModel, quantity: number = 1) {
-    this.orderStore.addToCart(product, quantity);
-    this.showNotification(`${product.name} sepete eklendi`);
+  private loadInitialData() {
+    this.productStore.loadProducts();
+    this.categoryStore.loadCategories();
+    this.orderStore.loadOrders();
   }
 
-  removeFromCart(itemId: string) {
-    this.orderStore.removeFromCart(itemId);
-    this.showNotification('Ürün sepetten kaldırıldı');
-  }
-
-  updateCartItemQuantity(itemId: string, quantity: number) {
-    this.orderStore.updateCartItemQuantity(itemId, quantity);
-  }
-
-  clearCart() {
-    this.orderStore.clearCart();
-    this.showNotification('Sepet temizlendi');
-  }
-
-  async completeOrder() {
-    try {
-      // Get customer data (you can implement proper customer selection)
-      const customer: CustomerModel = {
-        id: 'default-customer',
-        name: 'Müşteri',
-        email: '',
-        phone: '',
-        isEInvoice: true,
-        taxNo: '',
-        taxOffice: '',
-        tcNo: '',
-      };
-
-      const cartItems = this.cartItems();
-      if (cartItems.length === 0) {
-        this.showNotification('Sepet boş!', 'error');
-        return;
-      }
-
-      const orderData: Partial<OrderModel> = {
-        id: crypto.randomUUID(),
-        documentNumber: `ORD-${Date.now()}`,
-        customerId: customer.id,
-        customer: customer,
-        items: cartItems,
-        totalPrice: this.cartTotal(),
-        totalQuantity: this.cartItemCount(),
-        status: OrderStatus.Pending,
-        paymentMethod: PaymentMethod.Cash,
-        orderDate: new Date(),
-      };
-
-      const order = await this.orderStore.createOrder(orderData);
-
-      if (order) {
-        this.showNotification('Sipariş başarıyla tamamlandı');
-        this.toggleOrderPanel();
-      } else {
-        this.showNotification('Sipariş tamamlanırken hata oluştu', 'error');
-      }
-    } catch (error) {
-      console.error('Order completion error:', error);
-      this.showNotification('Sipariş tamamlanırken hata oluştu', 'error');
-    }
+  toggleSidebar() {
+    this.sidebarOpen.update(open => !open);
   }
 
   toggleOrderPanel() {
-    this.isOrderPanelOpen.set(!this.isOrderPanelOpen());
+    this.isOrderPanelOpen.update(open => !open);
   }
 
-  viewOrderDetails(order: OrderModel) {
-    // Navigate to order details or show modal
-    console.log('Viewing order details:', order);
+  addToCart(product: ProductModel) {
+    this.orderStore.addToCart(product, 1);
+    this.snackBar.open(
+      `${product.name} sepete eklendi`,
+      'Tamam',
+      { duration: 2000 }
+    );
   }
 
-  refreshData() {
-    this.productStore.loadProducts();
-    this.orderStore.loadOrders();
-    this.categoryStore.loadCategories();
-    this.showNotification('Veriler yenilendi');
+  updateQuantity(productId: string, change: number) {
+    this.orderStore.updateCartQuantity(productId, change);
   }
 
-  // Search functionality
-  searchProducts(query: string): ProductModel[] {
-    return this.productStore.searchProducts(query);
+  removeFromCart(productId: string) {
+    this.orderStore.removeFromCart(productId);
+    this.snackBar.open(
+      'Ürün sepetten çıkarıldı',
+      'Tamam',
+      { duration: 2000 }
+    );
   }
 
-  getProductByBarcode(barcode: string): ProductModel | undefined {
-    return this.productStore.getProductByBarcode(barcode);
-  }
+  // Müşteri seçimi dialogu
+  selectCustomer() {
+    const dialogRef = this.dialog.open(CustomerSelection, {
+      width: '500px',
+      data: {}
+    });
 
-  // Category filtering
-  setSelectedCategory(categoryId: string) {
-    this.productStore.setSelectedCategory(categoryId);
-  }
-
-  // Notifications
-  private showNotification(
-    message: string,
-    type: 'success' | 'error' = 'success'
-  ) {
-    this.snackBar.open(message, 'Kapat', {
-      duration: 3000,
-      panelClass: type === 'error' ? 'error-snackbar' : 'success-snackbar',
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.selectedCustomer.set(result);
+        // Müşteri seçildiğinde ürün fiyatlarını güncelle
+        this.productStore.updateProductPricesForCustomer(result.priceType);
+      }
     });
   }
 
-  // Utility methods
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: 'TRY',
-    }).format(price);
-  }
-
-  formatDate(date: Date): string {
-    return new Intl.DateTimeFormat('tr-TR', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(date));
-  }
-
-  // Stock management
-  updateStock(productId: string, newStock: number) {
-    this.productStore.updateStock(productId, newStock);
-  }
-
-  checkLowStock(): boolean {
-    return this.lowStockProducts().length > 0;
-  }
-
-  // Order management
-  async updateOrderStatus(orderId: string, status: string) {
-    const success = await this.orderStore.updateOrderStatus(orderId, status);
-    if (success) {
-      this.showNotification('Sipariş durumu güncellendi');
-    } else {
-      this.showNotification('Sipariş durumu güncellenemedi', 'error');
+  // Sipariş tamamlama
+  async completeOrder(paymentMethod: PaymentMethod) {
+    const customer = this.selectedCustomer();
+    if (!customer) {
+      this.snackBar.open(
+        'Lütfen müşteri seçin',
+        'Tamam',
+        { duration: 3000 }
+      );
+      return;
     }
-  }
 
-  // Statistics
-  getTotalSales(): number {
-    return this.orderStore.getTotalSales();
-  }
+    const cartItems = this.cartItems();
+    if (cartItems.length === 0) {
+      this.snackBar.open(
+        'Sepet boş',
+        'Tamam',
+        { duration: 3000 }
+      );
+      return;
+    }
 
-  getOrdersCountByStatus(): Record<string, number> {
-    return this.orderStore.getOrdersCountByStatus();
-  }
-  sidebarOpen = signal(true);
-
-  toggleSidebar() {
-    this.sidebarOpen.set(!this.sidebarOpen());
-  }
-  notifications = computed(() => {
-    const lowStock = this.lowStockProducts();
-    return lowStock.map((product) => ({
-      id: product.id,
-      message: `${product.name} stoğu azaldı`,
-      type: 'warning',
-    }));
-  });
-  logout() {
-    this.#auth.logout(); // Header'da logout butonunda kullanın
-  }
-  currentOrder = computed(() => this.orderStore.currentOrder());
-  updateQuantity(productId: string, change: number) {
-    const item = this.cartItems().find((i) => i.productId === productId);
-    if (item) {
-      this.updateCartItemQuantity(item.id, item.quantity + change);
+    const order = await this.orderStore.completeOrder(customer, paymentMethod);
+    
+    if (order) {
+      this.selectedCustomer.set(null);
+      this.snackBar.open(
+        'Sipariş tamamlandı!',
+        'Tamam',
+        { duration: 3000 }
+      );
+    } else {
+      this.snackBar.open(
+        'Sipariş tamamlanırken hata oluştu',
+        'Tamam',
+        { duration: 3000 }
+      );
     }
   }
 
   cancelOrder() {
-    this.clearCart();
-    this.isOrderPanelOpen.set(false);
+    this.orderStore.clearCart();
+    this.selectedCustomer.set(null);
+    this.snackBar.open(
+      'Sipariş iptal edildi',
+      'Tamam',
+      { duration: 2000 }
+    );
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

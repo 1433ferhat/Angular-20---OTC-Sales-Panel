@@ -1,107 +1,159 @@
+// Layout SCSS güncellemeleri
 .app-layout {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+}
 
-  .app-header {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.app-header {
+  position: relative;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+  .header-spacer {
+    flex: 1 1 auto;
+  }
+
+  .app-icon {
+    margin-right: 8px;
+  }
+
+  .app-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+
+  // ✅ User menu güncellemeleri
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
     
-    .app-icon {
-      margin-left: 8px;
-      margin-right: 8px;
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
-    
-    .app-title {
-      font-size: 18px;
-      font-weight: 500;
-    }
-    
-    .header-spacer {
-      flex: 1 1 auto;
-    }
-    
-    .user-menu {
+
+    // User avatar (initials)
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.2);
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-left: 16px;
-      
-      span {
-        font-size: 14px;
-      }
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    span {
+      font-size: 14px;
+      font-weight: 500;
     }
   }
+}
 
-  .app-container {
-    flex: 1;
-    overflow: hidden;
-    
-    .app-sidenav {
-      width: 280px;
-      border-right: 1px solid #e0e0e0;
+// ✅ User menu dropdown stilleri
+.mat-mdc-menu-panel {
+  .user-info-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 12px;
+    background-color: #f8f9fa;
+    margin: -8px -8px 0 -8px;
+
+    .user-avatar-large {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #1976d2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
     }
-    
-    .app-content {
+
+    .user-details {
       flex: 1;
-      overflow: hidden;
-      
-      .content-wrapper {
-        height: 100%;
-        display: grid;
-        grid-template-columns: 1fr 400px;
-        gap: 16px;
-        padding: 16px;
-        overflow: hidden;
-        
-        .left-content {
-          overflow-y: auto;
-        }
-        
-        .right-panel {
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        }
+
+      .user-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 2px;
+      }
+
+      .user-email {
+        font-size: 12px;
+        color: #6b7280;
+        margin-bottom: 2px;
+      }
+
+      .user-role {
+        font-size: 11px;
+        color: #1976d2;
+        background-color: rgba(25, 118, 210, 0.1);
+        padding: 2px 6px;
+        border-radius: 12px;
+        display: inline-block;
       }
     }
   }
 }
 
-// Responsive Design
-@media (max-width: 1200px) {
-  .app-layout {
-    .app-container {
-      .app-content {
-        .content-wrapper {
-          grid-template-columns: 1fr;
-          grid-template-rows: 1fr auto;
-          
-          .right-panel {
-            max-height: 300px;
-          }
-        }
+.app-container {
+  flex: 1;
+  
+  .app-sidenav {
+    width: 260px;
+    border-right: 1px solid #e0e0e0;
+  }
+
+  .app-content {
+    .content-wrapper {
+      display: flex;
+      height: 100%;
+
+      .left-content {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+      }
+
+      .right-panel {
+        width: 400px;
+        border-left: 1px solid #e0e0e0;
+        background-color: #fafafa;
+        overflow-y: auto;
       }
     }
   }
 }
 
+// Responsive design
 @media (max-width: 768px) {
-  .app-layout {
-    .app-container {
-      .app-sidenav {
-        width: 240px;
+  .app-header {
+    .user-menu {
+      span {
+        display: none;
       }
-      
-      .app-content {
-        .content-wrapper {
-          padding: 8px;
-          gap: 8px;
-        }
-      }
+    }
+  }
+
+  .app-content .content-wrapper {
+    flex-direction: column;
+
+    .right-panel {
+      width: 100%;
+      height: 300px;
+      border-left: none;
+      border-top: 1px solid #e0e0e0;
     }
   }
 }

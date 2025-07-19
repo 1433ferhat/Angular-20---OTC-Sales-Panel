@@ -1,12 +1,15 @@
+import { PriceType } from '@shared/enums/price-type.enum';
+
 export interface CustomerModel {
   id: string;
   name: string;
   phone: string;
   email: string;
-  taxOffice: string;
-  taxNo: string;
+  taxOffice?: string;
+  taxNo?: string;
+  tcNo?: string;
   isEInvoice: boolean;
-  tcNo: string;
+  priceType: PriceType; // ✅ Müşterinin fiyat tipi
 }
 
 export class InitialCustomer {
@@ -14,4 +17,9 @@ export class InitialCustomer {
   name = '';
   phone = '';
   email = '';
+  taxOffice = '';
+  taxNo = '';
+  tcNo = '';
+  isEInvoice = true;
+  priceType = PriceType.Undefined;
 }

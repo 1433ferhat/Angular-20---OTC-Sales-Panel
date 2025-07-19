@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { ProductModel } from '../models/product.model';
 import { CategoryModel } from '../models/category.model';
 import { lastValueFrom } from 'rxjs';
+import { PriceType } from '@shared/enums/price-type.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -150,5 +151,46 @@ export class ProductStore {
     return this.products().find((p) =>
       p.barcodes?.some((b) => barcodes.includes(b.value))
     );
+  }
+  // Müşteriye göre ürün fiyatı hesapla
+  getProductPriceForCustomer(
+    product: ProductModel,
+    customerPriceType: PriceType
+  ): number {
+    if (!product.prices || product.prices.length === 0) {
+      return 0;
+    }
+
+    // Müşterinin fiyat tipine göre fiyat ara
+    const customerPrice = product.prices.find(
+      (p) => p.priceType === customerPriceType
+    );
+
+    if (customerPrice) {
+      return customerPrice.price;
+    }
+
+    // Eğer müşteri fiyatı yoksa default ECZ fiyatını kullan
+    const defaultPrice = product.prices.find(
+      (p) => p.priceType === PriceType.ECZ
+    );
+    if (defaultPrice) {
+      return defaultPrice.price;
+    }
+
+    // Son çare olarak ilk fiyatı döndür
+    return product.prices[0]?.price || 0;
+  }
+
+  // Ürünlerin fiyatlarını müşteri tipine göre güncelle
+  updateProductPricesForCustomer(customerPriceType: PriceType) {
+    const products = this.products();
+    const updatedProducts = products.map((product) => ({
+      ...product,
+      currentPrice: this.getProductPriceForCustomer(product, customerPriceType),
+    }));
+
+    // Bu güncellemeyi signal olarak yayınla
+    this._products.set(updatedProducts);
   }
 }
