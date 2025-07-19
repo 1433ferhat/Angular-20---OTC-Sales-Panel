@@ -19,20 +19,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { HttpClient } from '@angular/common/http';
-import { Common } from '../../services/common';
+import { AuthService } from '../../services/auth.service';
 
 interface LoginRequest {
   email: string;
   password: string;
-}
-
-interface LoginResponse {
-  accessToken: {
-    expirationDate: string;
-    token: string;
-  };
-  requiredAuthenticatorType: any;
 }
 
 @Component({
@@ -56,8 +47,7 @@ interface LoginResponse {
 export default class Login {
   private fb = inject(FormBuilder);
   private router = inject(Router);
-  private http = inject(HttpClient);
-  private common = inject(Common);
+  private authService = inject(AuthService);
 
   loginForm: FormGroup;
   isLoading = signal(false);
@@ -71,7 +61,7 @@ export default class Login {
     });
 
     // Zaten giriş yapmışsa dashboard'a yönlendir
-    if (this.common.isAuthenticated()) {
+    if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
   }
@@ -83,21 +73,12 @@ export default class Login {
 
       const credentials: LoginRequest = this.loginForm.value;
 
-      this.http.post<LoginResponse>('api/auth/login', credentials).subscribe({
+      this.authService.login(credentials).subscribe({
         next: (response) => {
-          try {
-            // Common service'deki loginSuccess metodunu kullan
-            this.common.loginSuccess(response.accessToken.token);
-            
-            // Dashboard'a yönlendir
-            this.router.navigate(['/dashboard']);
-          } catch (error) {
-            console.error('Login success handling error:', error);
-            this.errorMessage.set('Giriş işlemi başarılı ancak yönlendirme hatası oluştu.');
-          }
+          // AuthService içinde user set edildi, sadece yönlendir
+          this.router.navigate(['/dashboard']);
         },
         error: (error) => {
-          console.error('Login error:', error);
           this.errorMessage.set(
             error.error?.message || 'Giriş yapılırken bir hata oluştu.'
           );

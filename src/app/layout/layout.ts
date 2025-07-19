@@ -29,6 +29,7 @@ import { CustomerModel } from '@shared/models/customer.model';
 import { OrderStatus } from '@shared/enums/order-status.enum';
 import { PaymentMethod } from '@shared/enums/payment-method.enum';
 import { Common } from '../services/common';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -57,7 +58,7 @@ export default class Layout implements OnInit {
   private orderStore = inject(OrderStore);
   private categoryStore = inject(CategoryStore);
   private snackBar = inject(MatSnackBar);
-  private common = inject(Common);
+  readonly #auth = inject(AuthService);
   // Signals for state management
   currentUser = signal({
     name: 'Eczacı',
@@ -276,7 +277,7 @@ export default class Layout implements OnInit {
     }));
   });
   logout() {
-    this.common.logout(); // Header'da logout butonunda kullanın
+    this.#auth.logout(); // Header'da logout butonunda kullanın
   }
   currentOrder = computed(() => this.orderStore.currentOrder());
   updateQuantity(productId: string, change: number) {

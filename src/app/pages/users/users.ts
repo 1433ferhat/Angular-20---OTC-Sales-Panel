@@ -38,9 +38,11 @@ export default class Users {
     {
       id: '1',
       name: 'Admin User',
+      firstName: 'Admin', // Eksik olan alan eklendi
+      lastName: 'User',   // Eksik olan alan eklendi
       email: 'admin@example.com',
       operationClaims: [
-        { id: '1', name: 'admin' } as OperationClaimsModel // Düzeltme: string yerine OperationClaimsModel
+        { id: '1', name: 'admin' } as OperationClaimsModel
       ],
       status: 'active',
     },
