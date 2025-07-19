@@ -10,10 +10,16 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
 import { OrderItemModel } from '@shared/models/order-item.model';
 import { OrderModel } from '@shared/models/order.model';
 import { CustomerModel } from '@shared/models/customer.model';
 import { PaymentMethod } from '@shared/enums/payment-method.enum';
+import { PriceType } from '@shared/enums/price-type.enum';
 
 @Component({
   selector: 'app-order-panel',
@@ -27,6 +33,11 @@ import { PaymentMethod } from '@shared/enums/payment-method.enum';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatMenuModule,
+    MatTooltipModule,
+    FormsModule,
     CurrencyPipe,
   ],
 })
@@ -46,11 +57,24 @@ export default class OrderPanel {
   @Output() orderCancelled = new EventEmitter<void>();
   @Output() customerSelectionRequested = new EventEmitter<void>();
 
-  // Enum'u template'te kullanabilmek için
   PaymentMethod = PaymentMethod;
 
   changeQuantity(itemId: string, change: number) {
-    this.quantityChanged.emit({ productId: itemId, change });
+    const item = this.cart.find(i => i.id === itemId);
+    if (item) {
+      this.quantityChanged.emit({ productId: item.productId, change });
+    }
+  }
+
+  updateQuantityManual(itemId: string, event: any) {
+    const newQuantity = parseInt(event.target.value) || 1;
+    const item = this.cart.find(i => i.id === itemId);
+    if (item) {
+      const change = newQuantity - item.quantity;
+      if (change !== 0) {
+        this.quantityChanged.emit({ productId: item.productId, change });
+      }
+    }
   }
 
   removeItem(itemId: string) {
@@ -80,5 +104,22 @@ export default class OrderPanel {
 
   getItemBarcode(item: OrderItemModel): string {
     return item.product?.barcodes?.[0]?.value || '';
+  }
+
+  getPriceTypeText(priceType: PriceType): string {
+    const priceTypes: Record<PriceType, string> = {
+      [PriceType.ECZ]: 'Eczane',
+      [PriceType.ZON]: 'Zon',
+      [PriceType.LZON]: 'L-Zon',
+      [PriceType.E1]: 'E1',
+      [PriceType.NV]: 'NV',
+      [PriceType.T1]: 'T1',
+      [PriceType.T2]: 'T2',
+      [PriceType.T3]: 'T3',
+      [PriceType.T4]: 'T4',
+      [PriceType.T5]: 'T5',
+      [PriceType.Undefined]: 'Tanımsız'
+    };
+    return priceTypes[priceType] || 'Bilinmeyen';
   }
 }

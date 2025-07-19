@@ -20,7 +20,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import Sidebar from '../components/sidebar/sidebar';
 import OrderPanel from '../components/order-panel/order-panel';
-import { CustomerSelection } from '../components/customer-selection/customer-selection';
+import CustomerSelection from '../components/customer-selection/customer-selection';
 import { ProductStore } from '@shared/stores/product.store';
 import { OrderStore } from '@shared/stores/order.store';
 import { CategoryStore } from '@shared/stores/category.store';
@@ -100,7 +100,7 @@ export default class Layout implements OnInit {
         const orderDate = new Date(order.orderDate);
         orderDate.setHours(0, 0, 0, 0);
         return orderDate.getTime() === today.getTime() && 
-               order.status === OrderStatus.COMPLETED;
+               order.status === OrderStatus.Completed;
       })
       .reduce((total, order) => total + order.totalPrice, 0);
   });
@@ -108,7 +108,7 @@ export default class Layout implements OnInit {
   notifications = computed(() => {
     const lowStock = this.lowStockProducts();
     const pendingOrders = this.orderStore.orders().filter(
-      order => order.status === OrderStatus.PENDING
+      order => order.status === OrderStatus.Pending
     );
 
     return [
@@ -154,7 +154,12 @@ export default class Layout implements OnInit {
   }
 
   updateQuantity(productId: string, change: number) {
-    this.orderStore.updateCartQuantity(productId, change);
+    const cartItems = this.cartItems();
+    const item = cartItems.find(i => i.productId === productId);
+    if (item) {
+      const newQuantity = Math.max(1, item.quantity + change);
+      this.orderStore.updateCartItemQuantity(item.id, newQuantity);
+    }
   }
 
   removeFromCart(productId: string) {
