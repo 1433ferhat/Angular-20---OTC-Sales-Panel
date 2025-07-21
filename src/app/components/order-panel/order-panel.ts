@@ -60,7 +60,7 @@ export default class OrderPanel {
   PaymentMethod = PaymentMethod;
 
   changeQuantity(itemId: string, change: number) {
-    const item = this.cart.find(i => i.id === itemId);
+    const item = this.cart.find((i) => i.id === itemId);
     if (item) {
       this.quantityChanged.emit({ productId: item.productId, change });
     }
@@ -68,7 +68,7 @@ export default class OrderPanel {
 
   updateQuantityManual(itemId: string, event: any) {
     const newQuantity = parseInt(event.target.value) || 1;
-    const item = this.cart.find(i => i.id === itemId);
+    const item = this.cart.find((i) => i.id === itemId);
     if (item) {
       const change = newQuantity - item.quantity;
       if (change !== 0) {
@@ -108,17 +108,26 @@ export default class OrderPanel {
 
   getPriceTypeText(priceType: PriceType): string {
     const priceTypes: Record<PriceType, string> = {
-      [PriceType.ECZ]: 'Eczane',
+      [PriceType.Undefined]: 'Tanımsız',
       [PriceType.ZON]: 'Zon',
       [PriceType.LZON]: 'L-Zon',
       [PriceType.E1]: 'E1',
       [PriceType.NV]: 'NV',
+      [PriceType.FB]: 'FB',
+      [PriceType.TY]: 'TY',
+      [PriceType.HB]: 'HB',
+      [PriceType.N11]: 'N11',
+      [PriceType.PTT]: 'PTT',
+      [PriceType.AMZ]: 'AMZ',
+      [PriceType.PZR]: 'PZR',
+      [PriceType.IDE]: 'IDE',
+      [PriceType.ETIC]: 'ETIC',
+      [PriceType.ECZ]: 'Eczane',
       [PriceType.T1]: 'T1',
       [PriceType.T2]: 'T2',
       [PriceType.T3]: 'T3',
       [PriceType.T4]: 'T4',
       [PriceType.T5]: 'T5',
-      [PriceType.Undefined]: 'Tanımsız'
     };
     return priceTypes[priceType] || 'Bilinmeyen';
   }

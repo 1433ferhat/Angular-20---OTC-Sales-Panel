@@ -19,7 +19,7 @@ import { PriceType } from '@shared/enums/price-type.enum';
 @Component({
   selector: 'app-customer-selection',
   templateUrl: './customer-selection.html',
-  styleUrl: './customer-selection.scss',
+  styleUrl: './customer-seleciton.scss',
   standalone: true,
   imports: [
     CommonModule,
@@ -78,7 +78,16 @@ export default class CustomerSelection {
 
   // Form validasyonu
   isFormValid(): boolean {
-    const { name, phone, email, isEInvoice, tcNo, taxOffice, taxNo, priceType } = this.customerData;
+    const {
+      name,
+      phone,
+      email,
+      isEInvoice,
+      tcNo,
+      taxOffice,
+      taxNo,
+      priceType,
+    } = this.customerData;
 
     // Temel alanlar kontrolü
     if (!name || !phone || !email || priceType === undefined) {
@@ -88,7 +97,7 @@ export default class CustomerSelection {
     // Kurumsal ise
     if (this.isCorporate()) {
       return !!(taxOffice && taxNo && taxNo.length === 10);
-    } 
+    }
     // Bireysel ise
     else {
       return !!(tcNo && tcNo.length === 11);
@@ -113,17 +122,16 @@ export default class CustomerSelection {
         email: this.customerData.email!,
         isEInvoice: this.customerData.isEInvoice!,
         priceType: this.customerData.priceType!,
-        ...(this.isCorporate() 
-          ? { 
+        ...(this.isCorporate()
+          ? {
               taxOffice: this.customerData.taxOffice!,
-              taxNo: this.customerData.taxNo!
+              taxNo: this.customerData.taxNo!,
             }
-          : { 
-              tcNo: this.customerData.tcNo!
-            }
-        )
+          : {
+              tcNo: this.customerData.tcNo!,
+            }),
       };
-      
+
       this.dialogRef.close(customer);
     }
   }

@@ -94,34 +94,37 @@ export default class Layout implements OnInit {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return this.orderStore.orders()
-      .filter(order => {
+    return this.orderStore
+      .orders()
+      .filter((order) => {
         if (!order.orderDate) return false;
         const orderDate = new Date(order.orderDate);
         orderDate.setHours(0, 0, 0, 0);
-        return orderDate.getTime() === today.getTime() && 
-               order.status === OrderStatus.Completed;
+        return (
+          orderDate.getTime() === today.getTime() &&
+          order.status === OrderStatus.Completed
+        );
       })
       .reduce((total, order) => total + order.totalPrice, 0);
   });
 
   notifications = computed(() => {
     const lowStock = this.lowStockProducts();
-    const pendingOrders = this.orderStore.orders().filter(
-      order => order.status === OrderStatus.Pending
-    );
+    const pendingOrders = this.orderStore
+      .orders()
+      .filter((order) => order.status === OrderStatus.Pending);
 
     return [
-      ...lowStock.map(product => ({
+      ...lowStock.map((product) => ({
         id: `low-stock-${product.id}`,
         type: 'warning' as const,
-        message: `${product.name} stoku düşük`
+        message: `${product.name} stoku düşük`,
       })),
-      ...pendingOrders.map(order => ({
+      ...pendingOrders.map((order) => ({
         id: `pending-order-${order.id}`,
         type: 'info' as const,
-        message: `Bekleyen sipariş: ${order.id}`
-      }))
+        message: `Bekleyen sipariş: ${order.id}`,
+      })),
     ];
   });
 
@@ -137,25 +140,23 @@ export default class Layout implements OnInit {
   }
 
   toggleSidebar() {
-    this.sidebarOpen.update(open => !open);
+    this.sidebarOpen.update((open) => !open);
   }
 
   toggleOrderPanel() {
-    this.isOrderPanelOpen.update(open => !open);
+    this.isOrderPanelOpen.update((open) => !open);
   }
 
   addToCart(product: ProductModel) {
     this.orderStore.addToCart(product, 1);
-    this.snackBar.open(
-      `${product.name} sepete eklendi`,
-      'Tamam',
-      { duration: 2000 }
-    );
+    this.snackBar.open(`${product.name} sepete eklendi`, 'Tamam', {
+      duration: 2000,
+    });
   }
 
   updateQuantity(productId: string, change: number) {
     const cartItems = this.cartItems();
-    const item = cartItems.find(i => i.productId === productId);
+    const item = cartItems.find((i) => i.productId === productId);
     if (item) {
       const newQuantity = Math.max(1, item.quantity + change);
       this.orderStore.updateCartItemQuantity(item.id, newQuantity);
@@ -164,21 +165,17 @@ export default class Layout implements OnInit {
 
   removeFromCart(productId: string) {
     this.orderStore.removeFromCart(productId);
-    this.snackBar.open(
-      'Ürün sepetten çıkarıldı',
-      'Tamam',
-      { duration: 2000 }
-    );
+    this.snackBar.open('Ürün sepetten çıkarıldı', 'Tamam', { duration: 2000 });
   }
 
   // Müşteri seçimi dialogu
   selectCustomer() {
     const dialogRef = this.dialog.open(CustomerSelection, {
       width: '500px',
-      data: {}
+      data: {},
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.selectedCustomer.set(result);
         // Müşteri seçildiğinde ürün fiyatlarını güncelle
@@ -191,53 +188,38 @@ export default class Layout implements OnInit {
   async completeOrder(paymentMethod: PaymentMethod) {
     const customer = this.selectedCustomer();
     if (!customer) {
-      this.snackBar.open(
-        'Lütfen müşteri seçin',
-        'Tamam',
-        { duration: 3000 }
-      );
+      this.snackBar.open('Lütfen müşteri seçin', 'Tamam', { duration: 3000 });
       return;
     }
 
     const cartItems = this.cartItems();
     if (cartItems.length === 0) {
-      this.snackBar.open(
-        'Sepet boş',
-        'Tamam',
-        { duration: 3000 }
-      );
+      this.snackBar.open('Sepet boş', 'Tamam', { duration: 3000 });
       return;
     }
 
     const order = await this.orderStore.completeOrder(customer, paymentMethod);
-    
+
     if (order) {
       this.selectedCustomer.set(null);
-      this.snackBar.open(
-        'Sipariş tamamlandı!',
-        'Tamam',
-        { duration: 3000 }
-      );
+      this.snackBar.open('Sipariş tamamlandı!', 'Tamam', { duration: 3000 });
     } else {
-      this.snackBar.open(
-        'Sipariş tamamlanırken hata oluştu',
-        'Tamam',
-        { duration: 3000 }
-      );
+      this.snackBar.open('Sipariş tamamlanırken hata oluştu', 'Tamam', {
+        duration: 3000,
+      });
     }
   }
 
   cancelOrder() {
     this.orderStore.clearCart();
     this.selectedCustomer.set(null);
-    this.snackBar.open(
-      'Sipariş iptal edildi',
-      'Tamam',
-      { duration: 2000 }
-    );
+    this.snackBar.open('Sipariş iptal edildi', 'Tamam', { duration: 2000 });
   }
 
   logout() {
     this.authService.logout();
+  }
+  viewOrderDetails(order: OrderModel): void {
+    console.log('Order Details:', order);
   }
 }

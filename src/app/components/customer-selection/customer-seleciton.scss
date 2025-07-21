@@ -1,25 +1,42 @@
-.customer-dialog {
-  min-width: 500px;
-  max-width: 600px;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin: 16px 0;
-
-  mat-form-field:first-child {
-    grid-column: 1 / -1;
+.customer-selection {
+  padding: 16px;
+  
+  .search-field {
+    width: 100%;
+    margin-bottom: 16px;
   }
 
-  mat-checkbox {
-    grid-column: 1 / -1;
-    margin-top: 8px;
+  .customer-list {
+    max-height: 300px;
+    overflow-y: auto;
   }
-}
 
-mat-dialog-actions {
-  padding: 16px 24px;
-  gap: 8px;
+  .customer-item {
+    padding: 12px;
+    border: 1px solid #ddd;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    .customer-name {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .customer-details {
+      font-size: 0.9em;
+      color: #666;
+    }
+  }
+
+  .no-customers {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+  }
 }

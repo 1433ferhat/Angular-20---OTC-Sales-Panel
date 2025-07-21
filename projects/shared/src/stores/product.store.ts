@@ -1,10 +1,10 @@
-// projects/shared/src/stores/product.store.ts
 import { Injectable, signal, computed, inject, resource } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { ProductModel } from '../models/product.model';
 import { CategoryModel } from '../models/category.model';
-import { lastValueFrom } from 'rxjs';
-import { PriceType } from '@shared/enums/price-type.enum';
+import { lastValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { PriceType } from '../enums/price-type.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -14,18 +14,30 @@ export class ProductStore {
 
   // Signals
   private _selectedCategory = signal<string>('all');
-  private _refreshTrigger = signal(0);
 
-  // Resource for products (Angular 20 approach)
+  // Resources with error handling
   productsResource = resource({
     loader: () =>
-      lastValueFrom(this.http.get<ProductModel[]>('api/products/getall')),
+      lastValueFrom(
+        this.http.get<ProductModel[]>('api/products/getall').pipe(
+          catchError((error) => {
+            console.warn('Products API hatası:', error);
+            return of([]); // Boş array döndür
+          })
+        )
+      ),
   });
 
-  // Resource for categories
   categoriesResource = resource({
     loader: () =>
-      lastValueFrom(this.http.get<CategoryModel[]>('api/categories/getall')),
+      lastValueFrom(
+        this.http.get<CategoryModel[]>('api/categories/getall').pipe(
+          catchError((error) => {
+            console.warn('Categories API hatası:', error);
+            return of([]); // Boş array döndür
+          })
+        )
+      ),
   });
 
   // Computed signals
@@ -40,7 +52,7 @@ export class ProductStore {
     () => this.productsResource.error() || this.categoriesResource.error()
   );
 
-  // Filtered products based on selected category
+  // Filtered products
   filteredProducts = computed(() => {
     const products = this.products();
     const category = this._selectedCategory();
@@ -49,9 +61,7 @@ export class ProductStore {
     return products.filter((p) => p.categoryId === category);
   });
 
-  constructor() {
-    // Resources automatically load on initialization
-  }
+  constructor() {}
 
   // Actions
   loadProducts() {
@@ -63,7 +73,6 @@ export class ProductStore {
   }
 
   refreshData() {
-    this._refreshTrigger.set(this._refreshTrigger() + 1);
     this.loadProducts();
     this.loadCategories();
   }
@@ -77,120 +86,102 @@ export class ProductStore {
   }
 
   getProductByBarcode(barcode: string): ProductModel | undefined {
-    return this.products().find(
-      (p) => p.barcodes?.some((b) => b.value === barcode) // VALUE kullanılmalı
+    return this.products().find((p) =>
+      p.barcodes?.some((b) => b.value === barcode)
     );
   }
 
   searchProducts(query: string): ProductModel[] {
     const searchTerm = query.toLowerCase();
     return this.products().filter(
-      (p) =>
-        p.name.toLowerCase().includes(searchTerm) ||
-        p.code.toLowerCase().includes(searchTerm) ||
-        p.barcodes?.some((b) => b.value.includes(searchTerm)) // VALUE kullanılmalı
+      (product) =>
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.code.toLowerCase().includes(searchTerm) ||
+        product.barcodes?.some((b) => b.value.includes(query))
     );
   }
 
-  updateProduct(product: ProductModel) {
-    // Bu manuel güncelleme için bir signal kullanabilirsiniz
-    // Veya API çağrısı yapıp reload edebilirsiniz
-    this.loadProducts();
+  getProductPrice(
+    product: ProductModel,
+    priceType: PriceType = PriceType.ECZ
+  ): number {
+    const price = product.prices?.find((p) => p.priceType === priceType);
+    return price?.price || product.prices?.[0]?.price || 0;
   }
 
-  updateStock(productId: string, newStock: number) {
-    // API çağrısı yapıp sonra reload
-    this.http
-      .put(`api/products/${productId}/stock`, { stock: newStock })
-      .subscribe({
-        next: () => this.loadProducts(),
-        error: (error) => console.error('Stock update error:', error),
-      });
+  getProductStock(product: ProductModel): number {
+    return product.stock || 0;
   }
 
-  // Low stock products
+  isProductInStock(
+    product: ProductModel,
+    requiredQuantity: number = 1
+  ): boolean {
+    return this.getProductStock(product) >= requiredQuantity;
+  }
+
+  // Category helpers
+  getProductsByCategory(categoryId: string): ProductModel[] {
+    return this.products().filter((p) => p.categoryId === categoryId);
+  }
+
+  getCategoryProducts(category: CategoryModel): ProductModel[] {
+    return this.getProductsByCategory(category.id);
+  }
+
+  // Stock management
+  async updateProductStock(
+    productId: string,
+    newStock: number
+  ): Promise<boolean> {
+    try {
+      const response = await lastValueFrom(
+        this.http
+          .put<ProductModel>(`api/products/${productId}/stock`, {
+            stock: newStock,
+          })
+          .pipe(
+            catchError((error) => {
+              console.error('Stock update error:', error);
+              return of(null);
+            })
+          )
+      );
+
+      if (response) {
+        this.loadProducts();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Stock update error:', error);
+      return false;
+    }
+  }
+
+  // Statistics
+  getTotalProductCount(): number {
+    return this.products().length;
+  }
+
   getLowStockProducts(threshold: number = 10): ProductModel[] {
     return this.products().filter((p) => (p.stock || 0) < threshold);
   }
 
-  // Out of stock products
   getOutOfStockProducts(): ProductModel[] {
     return this.products().filter((p) => (p.stock || 0) === 0);
   }
 
-  // Product price helpers
-  getProductPrice(product: ProductModel): number {
-    return product.prices?.[0]?.price || 0;
-  }
-
-  getProductPriceHistory(product: ProductModel): number[] {
-    return product.prices?.map((p) => p.price) || [];
-  }
-
-  // Product expiration helpers
-  getProductExpirations(product: ProductModel): Date[] {
-    return product.expirations?.map((e) => new Date(e.expiration ?? '')) || [];
-  }
-
-  getExpiringSoonProducts(days: number = 30): ProductModel[] {
-    const futureDate = new Date();
-    futureDate.setDate(futureDate.getDate() + days);
-
-    return this.products().filter((p) => {
-      const expirations = this.getProductExpirations(p);
-      return expirations.some((exp) => exp <= futureDate);
+  getProductsByPriceRange(minPrice: number, maxPrice: number): ProductModel[] {
+    return this.products().filter((product) => {
+      const price = this.getProductPrice(product);
+      return price >= minPrice && price <= maxPrice;
     });
   }
-
-  // Barcode helpers
-  getProductBarcodes(product: ProductModel): string[] {
-    return product.barcodes?.map((b) => b.value) || [];
-  }
-
-  getProductByAnyBarcode(barcodes: string[]): ProductModel | undefined {
-    return this.products().find((p) =>
-      p.barcodes?.some((b) => barcodes.includes(b.value))
-    );
-  }
-  // Müşteriye göre ürün fiyatı hesapla
-  getProductPriceForCustomer(
-    product: ProductModel,
-    customerPriceType: PriceType
-  ): number {
-    if (!product.prices || product.prices.length === 0) {
-      return 0;
-    }
-
-    // Müşterinin fiyat tipine göre fiyat ara
-    const customerPrice = product.prices.find(
-      (p) => p.priceType === customerPriceType
-    );
-
-    if (customerPrice) {
-      return customerPrice.price;
-    }
-
-    // Eğer müşteri fiyatı yoksa default ECZ fiyatını kullan
-    const defaultPrice = product.prices.find(
-      (p) => p.priceType === PriceType.ECZ
-    );
-    if (defaultPrice) {
-      return defaultPrice.price;
-    }
-
-    // Son çare olarak ilk fiyatı döndür
-    return product.prices[0]?.price || 0;
-  }
-
-  // Ürünlerin fiyatlarını müşteri tipine göre güncelle
-  updateProductPricesForCustomer(customerPriceType: PriceType) {
-    const products = this.products();
-    const updatedProducts = products.map((product) => ({
-      ...product,
-      currentPrice: this.getProductPriceForCustomer(product, customerPriceType),
-    }));
-
-    // Bu güncellemeyi signal olarak yayınla
-    this._products.set(updatedProducts);
+  updateProductPricesForCustomer(customerPriceType: PriceType): void {
+    // Müşteri seçildiğinde fiyatları güncelle
+    // Bu method sadece fiyat tipini belirlemek için kullanılıyor
+    // Gerçek fiyat hesaplaması getProductPrice() metodunda yapılıyor
+    console.log('Customer price type updated:', customerPriceType);
   }
 }

@@ -1,11 +1,13 @@
-// projects/shared/src/stores/order.store.ts
 import { Injectable, signal, computed, inject, resource } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { OrderModel } from '../models/order.model';
 import { OrderItemModel } from '../models/order-item.model';
 import { ProductModel } from '../models/product.model';
-import { lastValueFrom } from 'rxjs';
-import { OrderStatus } from '@shared/enums/order-status.enum';
+import { CustomerModel } from '../models/customer.model';
+import { lastValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { OrderStatus } from '../enums/order-status.enum';
+import { PaymentMethod } from '../enums/payment-method.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -17,10 +19,17 @@ export class OrderStore {
   private _currentOrder = signal<OrderModel | null>(null);
   private _cartItems = signal<OrderItemModel[]>([]);
 
-  // Resource for orders (Angular 20 approach)
+  // Resource with error handling
   ordersResource = resource({
     loader: () =>
-      lastValueFrom(this.http.get<OrderModel[]>('api/orders/getall')),
+      lastValueFrom(
+        this.http.get<OrderModel[]>('api/orders/getall').pipe(
+          catchError(error => {
+            console.warn('Orders API hatası:', error);
+            return of([]); // Boş array döndür
+          })
+        )
+      ),
   });
 
   // Computed signals
@@ -42,9 +51,7 @@ export class OrderStore {
     return this._cartItems().reduce((count, item) => count + item.quantity, 0);
   });
 
-  constructor() {
-    // Resource automatically loads on initialization
-  }
+  constructor() {}
 
   // Actions
   loadOrders() {
@@ -103,9 +110,7 @@ export class OrderStore {
   }
 
   // Order operations
-  async createOrder(
-    orderData: Partial<OrderModel>
-  ): Promise<OrderModel | null> {
+  async createOrder(orderData: Partial<OrderModel>): Promise<OrderModel | null> {
     try {
       const order: Partial<OrderModel> = {
         ...orderData,
@@ -117,15 +122,19 @@ export class OrderStore {
       };
 
       const response = await lastValueFrom(
-        this.http.post<OrderModel>('api/orders/create', order)
+        this.http.post<OrderModel>('api/orders/create', order).pipe(
+          catchError(error => {
+            console.error('Order creation error:', error);
+            return of(null);
+          })
+        )
       );
 
       if (response) {
-        this.loadOrders(); // Reload orders after creation
+        this.loadOrders();
         this.clearCart();
         return response;
       }
-
       return null;
     } catch (error) {
       console.error('Order creation error:', error);
@@ -133,17 +142,54 @@ export class OrderStore {
     }
   }
 
-  async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
+  async completeOrder(customer: CustomerModel, paymentMethod: PaymentMethod): Promise<boolean> {
     try {
+      const orderData = {
+        customerId: customer.id,
+        customer: customer,
+        items: this._cartItems(),
+        totalPrice: this.cartTotal(),
+        totalQuantity: this.cartItemCount(),
+        paymentMethod: paymentMethod,
+        status: OrderStatus.Completed
+      };
+
       const response = await lastValueFrom(
-        this.http.put<OrderModel>(`api/orders/${orderId}/status`, { status })
+        this.http.post<OrderModel>('api/orders/complete', orderData).pipe(
+          catchError(error => {
+            console.error('Order completion error:', error);
+            return of(null);
+          })
+        )
       );
 
       if (response) {
-        this.loadOrders(); // Reload orders after update
+        this.loadOrders();
+        this.clearCart();
         return true;
       }
+      return false;
+    } catch (error) {
+      console.error('Order completion error:', error);
+      return false;
+    }
+  }
 
+  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<boolean> {
+    try {
+      const response = await lastValueFrom(
+        this.http.put<OrderModel>(`api/orders/${orderId}/status`, { status }).pipe(
+          catchError(error => {
+            console.error('Order status update error:', error);
+            return of(null);
+          })
+        )
+      );
+
+      if (response) {
+        this.loadOrders();
+        return true;
+      }
       return false;
     } catch (error) {
       console.error('Order status update error:', error);
@@ -169,52 +215,30 @@ export class OrderStore {
 
   // Statistics
   getTotalSales(): number {
-    return this.orders().reduce(
-      (total, order) =>
-        total + order.items.reduce((sum, item) => sum + item.totalPrice, 0),
-      0
-    );
+    return this.orders()
+      .filter(order => order.status === OrderStatus.Completed)
+      .reduce((total, order) => total + (order.totalPrice || 0), 0);
   }
 
-  getOrdersCountByStatus(): Record<string, number> {
-    const orders = this.orders();
-    return orders.reduce((acc, order) => {
-      acc[order.status] = (acc[order.status] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+  getTodaysSales(): number {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return this.orders()
+      .filter(order => {
+        if (!order.orderDate || order.status !== OrderStatus.Completed) return false;
+        const orderDate = new Date(order.orderDate);
+        orderDate.setHours(0, 0, 0, 0);
+        return orderDate.getTime() === today.getTime();
+      })
+      .reduce((total, order) => total + (order.totalPrice || 0), 0);
   }
-  // Order completion
-  async completeOrder(customer: CustomerModel, paymentMethod: PaymentMethod): Promise<OrderModel | null> {
-    const cartItems = this._cartItems();
-    if (cartItems.length === 0) return null;
 
-    try {
-      const orderData: Partial<OrderModel> = {
-        id: crypto.randomUUID(),
-        documentNumber: `ORD-${Date.now()}`,
-        customerId: customer.id,
-        customer: customer,
-        items: cartItems,
-        totalPrice: this.cartTotal(),
-        totalQuantity: this.cartItemCount(),
-        status: OrderStatus.PENDING,
-        paymentMethod: paymentMethod,
-        orderDate: new Date(),
-      };
+  getOrdersCount(): number {
+    return this.orders().length;
+  }
 
-      const response = await lastValueFrom(
-        this.http.post<OrderModel>('api/orders/create', orderData)
-      );
-
-      if (response) {
-        this.loadOrders();
-        this.clearCart();
-        return response;
-      }
-
-      return null;
-    } catch (error) {
-      return null;
-    }
+  getPendingOrdersCount(): number {
+    return this.orders().filter(o => o.status === OrderStatus.Pending).length;
   }
 }
