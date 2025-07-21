@@ -1,38 +1,36 @@
-<!-- src/app/layout/header/header.html -->
-<mat-toolbar color="primary" class="app-header">
-  <button mat-icon-button (click)="toggleSidebar()">
+<mat-toolbar class="app-header">
+  <button 
+    mat-icon-button 
+    (click)="toggleSidebar()"
+    aria-label="Menu Toggle">
     <mat-icon>menu</mat-icon>
   </button>
-  <mat-icon class="app-icon">point_of_sale</mat-icon>
-  <span class="app-title">OTC Satış Yönetimi</span>
-  
-  <span class="header-spacer"></span>
-  
-  <!-- Notifications -->
-  <button mat-icon-button>
-    <mat-icon>notifications</mat-icon>
-  </button>
-  
-  <!-- User Menu -->
-  <button mat-button [matMenuTriggerFor]="userMenu" class="user-menu">
-    <!-- User Avatar/Initial -->
-    @if (currentUserInitials()) {
-      <div class="user-avatar">{{ currentUserInitials() }}</div>
-    } @else {
-      <mat-icon>account_circle</mat-icon>
-    }
-    
-    <span>{{ currentUserName() }}</span>
-    <mat-icon>arrow_drop_down</mat-icon>
-  </button>
-  
-  <mat-menu #userMenu="matMenu">
+
+  <div class="header-brand">
+    <mat-icon class="app-icon">shopping_cart</mat-icon>
+    <span class="app-title">Satış Paneli</span>
+  </div>
+
+  <div class="header-spacer"></div>
+
+  <div class="header-actions">
+    <button 
+      mat-button 
+      [matMenuTriggerFor]="userMenu"
+      class="user-menu-trigger">
+      <div class="user-info">
+        <div class="user-avatar">{{ currentUserInitials() }}</div>
+        <span class="user-name">{{ currentUserName() }}</span>
+        <mat-icon>arrow_drop_down</mat-icon>
+      </div>
+    </button>
+  </div>
+
+  <mat-menu #userMenu="matMenu" class="user-dropdown">
     <div class="user-info-header">
-      <div class="user-avatar-large">{{ currentUserInitials() }}</div>
       <div class="user-details">
         <div class="user-name">{{ currentUserName() }}</div>
         <div class="user-email">{{ currentUser()?.email }}</div>
-        <div class="user-role">Admin</div>
       </div>
     </div>
     
@@ -42,13 +40,16 @@
       <mat-icon>person</mat-icon>
       <span>Profil</span>
     </button>
+    
     <button mat-menu-item>
       <mat-icon>settings</mat-icon>
       <span>Ayarlar</span>
     </button>
+    
     <mat-divider></mat-divider>
+    
     <button mat-menu-item (click)="logout()">
-      <mat-icon>logout</mat-icon>
+      <mat-icon>exit_to_app</mat-icon>
       <span>Çıkış Yap</span>
     </button>
   </mat-menu>
