@@ -1,6 +1,6 @@
+// src/app/layout/layout.ts
 import {
   Component,
-  OnInit,
   ChangeDetectionStrategy,
   ViewEncapsulation,
   signal,
@@ -10,28 +10,21 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatBadgeModule } from '@angular/material/badge';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import Sidebar from '../components/sidebar/sidebar';
 import OrderPanel from '../components/order-panel/order-panel';
 import CustomerSelection from '../components/customer-selection/customer-selection';
+import Header from './header/header';
 import { ProductStore } from '@shared/stores/product.store';
 import { OrderStore } from '@shared/stores/order.store';
 import { CategoryStore } from '@shared/stores/category.store';
 import { ProductModel } from '@shared/models/product.model';
 import { OrderModel } from '@shared/models/order.model';
 import { CustomerModel } from '@shared/models/customer.model';
-import { OrderStatus } from '@shared/enums/order-status.enum';
 import { PaymentMethod } from '@shared/enums/payment-method.enum';
 import { Common } from '../services/common';
 import { AuthService } from '../services/auth.service';
-import Header from './header/header';
 
 @Component({
   selector: 'app-layout',
@@ -46,12 +39,6 @@ import Header from './header/header';
     RouterModule,
     RouterOutlet,
     MatSidenavModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatBadgeModule,
-    MatDividerModule,
     Sidebar,
     OrderPanel,
   ],
@@ -67,7 +54,6 @@ export default class Layout {
 
   isUserLoggedIn = computed(() => this.common.isLoggedIn());
 
-  isOrderPanelOpen = signal(false);
   sidebarOpen = signal(true);
   selectedCustomer = signal<CustomerModel | null>(null);
 
@@ -93,8 +79,9 @@ export default class Layout {
     this.orderStore.loadOrders();
   }
 
-  toggleOrderPanel() {
-    this.isOrderPanelOpen.update((open) => !open);
+  // Header event handler
+  onSidebarToggle() {
+    this.sidebarOpen.update(open => !open);
   }
 
   addToCart(product: ProductModel) {
@@ -118,23 +105,20 @@ export default class Layout {
     this.snackBar.open('Ürün sepetten çıkarıldı', 'Tamam', { duration: 2000 });
   }
 
-  // Müşteri seçimi dialogu
   selectCustomer() {
     const dialogRef = this.dialog.open(CustomerSelection, {
-      width: '500px',
+      width: '600px',
       data: {},
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.selectedCustomer.set(result);
-        // Müşteri seçildiğinde ürün fiyatlarını güncelle
         this.productStore.updateProductPricesForCustomer(result.priceType);
       }
     });
   }
 
-  // Sipariş tamamlama
   async completeOrder(paymentMethod: PaymentMethod) {
     const customer = this.selectedCustomer();
     if (!customer) {

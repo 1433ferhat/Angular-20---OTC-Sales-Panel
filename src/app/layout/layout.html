@@ -1,10 +1,15 @@
+<!-- src/app/layout/layout.html -->
 <div class="app-layout">
   <!-- Header -->
-  <app-header />
+  <app-header (sidebarToggle)="onSidebarToggle()"></app-header>
+  
   <!-- Main Container -->
   <mat-sidenav-container class="app-container">
     <!-- Sidebar -->
-    <mat-sidenav #sidenav mode="side" [opened]="sidebarOpen()" class="app-sidenav">
+    <mat-sidenav #sidenav 
+                 mode="side" 
+                 [opened]="sidebarOpen()"
+                 class="app-sidenav">
       <app-sidebar></app-sidebar>
     </mat-sidenav>
 
@@ -18,10 +23,16 @@
 
         <!-- Sağ Panel - Sipariş Detayları -->
         <div class="right-panel">
-          <app-order-panel [currentOrder]="currentOrder()" [cart]="cartItems()" [cartTotal]="cartTotal()"
-            [cartItemCount]="cartItemCount()" [selectedCustomer]="selectedCustomer()"
-            (quantityChanged)="updateQuantity($event.productId, $event.change)" (itemRemoved)="removeFromCart($event)"
-            (orderCompleted)="completeOrder($event)" (orderCancelled)="cancelOrder()"
+          <app-order-panel 
+            [currentOrder]="currentOrder()"
+            [cart]="cartItems()"
+            [cartTotal]="cartTotal()"
+            [cartItemCount]="cartItemCount()"
+            [selectedCustomer]="selectedCustomer()"
+            (quantityChanged)="updateQuantity($event.productId, $event.change)"
+            (itemRemoved)="removeFromCart($event)"
+            (orderCompleted)="completeOrder($event)"
+            (orderCancelled)="cancelOrder()"
             (customerSelectionRequested)="selectCustomer()">
           </app-order-panel>
         </div>
