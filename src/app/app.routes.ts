@@ -18,7 +18,7 @@ export const routes: Routes = [
       //   title: 'Dashboard - OTC Satış',
       // },
       {
-        path: 'sales',
+        path: 'satis',
         loadComponent: () => import('./pages/home/home'),
         title: 'Satış Yap - OTC Satış',
       },
@@ -28,12 +28,12 @@ export const routes: Routes = [
         title: 'Satış Yap - OTC Satış',
       },
       {
-        path: 'products',
+        path: 'urunler',
         loadComponent: () => import('./pages/inventory/inventory'),
         title: 'Fiyat Sorgula - OTC Satış',
       },
       {
-        path: 'customers',
+        path: 'musteriler',
         loadComponent: () => import('./pages/customer/customer'),
       },
       {

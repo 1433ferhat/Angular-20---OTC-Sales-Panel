@@ -1,3 +1,4 @@
+<!-- src/app/components/barcode-scanner/barcode-scanner.html -->
 <mat-card class="barcode-scanner-card">
   <mat-card-header>
     <mat-card-title>
@@ -10,8 +11,13 @@
     <div class="scanner-container">
       <mat-form-field appearance="outline" class="barcode-input">
         <mat-label>Barkod veya Ürün Adı</mat-label>
-        <input matInput #barcodeInput [(ngModel)]="barcode" (keydown)="onKeyDown($event)" placeholder="Barkod okutun..."
-          autocomplete="off">
+        <input matInput 
+               #barcodeInput 
+               [value]="barcode()"
+               (input)="barcode.set($any($event.target).value)"
+               (keydown)="onKeyDown($event)" 
+               placeholder="Barkod okutun..."
+               autocomplete="off">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
 

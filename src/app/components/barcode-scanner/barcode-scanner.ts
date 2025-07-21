@@ -1,3 +1,4 @@
+// src/app/components/barcode-scanner/barcode-scanner.ts
 import {
   Component,
   Output,
@@ -18,7 +19,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { ProductModel } from '@shared/models/product.model';
 import { ProductStore } from '@shared/stores/product.store';
-import { HostListener } from '@angular/core';
 
 @Component({
   selector: 'app-barcode-scanner',
@@ -43,22 +43,8 @@ export default class BarcodeScanner {
 
   private productStore = inject(ProductStore);
 
-  private barcodeBuffer = '';
-
   barcode = signal<string>('');
   searchResults = signal<ProductModel[]>([]);
-
-  // @HostListener('document:keydown', ['$event'])
-  // onGlobalKeyDown(event: KeyboardEvent) {
-  //   // Sadece sayı tuşları ve Enter kabul et
-  //   if (/^[0-9]$/.test(event.key)) {
-  //     this.barcodeBuffer += event.key;
-  //   } else if (event.key === 'Enter' && this.barcodeBuffer.length > 0) {
-  //     this.barcode.set(this.barcodeBuffer);
-  //     this.searchProduct();
-  //     this.barcodeBuffer = '';
-  //   }
-  // }
 
   ngAfterViewInit() {
     setTimeout(() => this.barcodeInput?.nativeElement.focus(), 100);

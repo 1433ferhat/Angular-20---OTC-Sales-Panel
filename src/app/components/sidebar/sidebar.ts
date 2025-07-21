@@ -40,8 +40,9 @@ export default class Sidebar {
 
   singleItems: MenuItem[] = [
     // { name: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
-    { name: 'Satış Yap', icon: 'shopping_cart', route: 'sales' },
-    { name: 'Ürün Listesi', icon: 'inventory_2', route: 'products' },
+    { name: 'Satış Yap', icon: 'shopping_cart', route: 'satis' },
+    { name: 'Ürün Listesi', icon: 'inventory_2', route: 'urunler' },
+    { name: 'Müşteriler', icon: 'people', route: 'musteriler' },
   ];
 
   categories: MenuItem[] = [
@@ -55,16 +56,7 @@ export default class Sidebar {
     //     { name: 'Fiyat Sorgula', icon: 'search', route: 'price-check' },
     //   ],
     // },
-    {
-      name: 'Müşteriler',
-      icon: 'people',
-      route: '',
-      children: [
-        { name: 'Müşteri Listesi', icon: 'list', route: 'customers' },
-        { name: 'Yeni Müşteri', icon: 'person_add', route: 'customers/new' },
-        { name: 'Müşteri Arama', icon: 'search', route: 'customers/search' },
-      ],
-    },
+
     {
       name: 'Siparişler',
       icon: 'receipt_long',
