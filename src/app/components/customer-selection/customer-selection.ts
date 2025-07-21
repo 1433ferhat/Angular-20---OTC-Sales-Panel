@@ -16,6 +16,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatListModule } from '@angular/material/list';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDividerModule } from '@angular/material/divider';
 import { CustomerModel } from '@shared/models/customer.model';
 import { PriceType, getPriceTypeLabel, getPriceTypeOptions } from '@shared/enums/price-type.enum';
 
@@ -37,6 +38,7 @@ import { PriceType, getPriceTypeLabel, getPriceTypeOptions } from '@shared/enums
     MatRadioModule,
     MatListModule,
     MatTabsModule,
+    MatDividerModule,
   ],
 })
 export default class CustomerSelection implements OnInit {
@@ -63,29 +65,41 @@ export default class CustomerSelection implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('CustomerSelection ngOnInit çalıştı');
     this.loadSavedCustomers();
-    this.filterCustomers();
   }
 
   loadSavedCustomers() {
-    const saved = localStorage.getItem('customers');
-    this.savedCustomers = saved ? JSON.parse(saved) : [];
-    this.filteredCustomers.set(this.savedCustomers);
+    try {
+      const saved = localStorage.getItem('customers');
+      this.savedCustomers = saved ? JSON.parse(saved) : [];
+      console.log('Kayıtlı müşteriler:', this.savedCustomers.length);
+      this.filteredCustomers.set(this.savedCustomers);
+    } catch (error) {
+      console.error('Müşterileri yüklerken hata:', error);
+      this.savedCustomers = [];
+      this.filteredCustomers.set([]);
+    }
   }
 
   filterCustomers() {
-    const query = this.searchQuery().toLowerCase();
-    if (!query) {
-      this.filteredCustomers.set(this.savedCustomers);
-      return;
-    }
+    try {
+      const query = this.searchQuery().toLowerCase();
+      if (!query) {
+        this.filteredCustomers.set(this.savedCustomers);
+        return;
+      }
 
-    const filtered = this.savedCustomers.filter(customer =>
-      customer.name.toLowerCase().includes(query) ||
-      customer.phone.includes(query) ||
-      customer.email.toLowerCase().includes(query)
-    );
-    this.filteredCustomers.set(filtered);
+      const filtered = this.savedCustomers.filter(customer =>
+        customer.name.toLowerCase().includes(query) ||
+        customer.phone.includes(query) ||
+        customer.email.toLowerCase().includes(query)
+      );
+      this.filteredCustomers.set(filtered);
+    } catch (error) {
+      console.error('Filtreleme hatası:', error);
+      this.filteredCustomers.set([]);
+    }
   }
 
   selectExistingCustomer(customer: CustomerModel) {

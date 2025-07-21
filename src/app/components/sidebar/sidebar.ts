@@ -39,18 +39,30 @@ export default class Sidebar {
   expandedCategories = signal<Set<string>>(new Set(['Satış İşlemleri']));
 
   singleItems: MenuItem[] = [
-    { name: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
+    // { name: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
+    { name: 'Satış Yap', icon: 'shopping_cart', route: 'sales' },
+    { name: 'Ürün Listesi', icon: 'inventory_2', route: 'products' },
   ];
 
   categories: MenuItem[] = [
+    // {
+    //   name: 'Satış İşlemleri',
+    //   icon: 'point_of_sale',
+    //   route: '',
+    //   children: [
+    //     { name: 'Satış Yap', icon: 'shopping_cart', route: 'sales' },
+    //     { name: 'Hızlı Satış', icon: 'flash_on', route: 'quick-sales' },
+    //     { name: 'Fiyat Sorgula', icon: 'search', route: 'price-check' },
+    //   ],
+    // },
     {
-      name: 'Satış İşlemleri',
-      icon: 'point_of_sale',
+      name: 'Müşteriler',
+      icon: 'people',
       route: '',
       children: [
-        { name: 'Satış Yap', icon: 'shopping_cart', route: 'sales' },
-        { name: 'Hızlı Satış', icon: 'flash_on', route: 'quick-sales' },
-        { name: 'Fiyat Sorgula', icon: 'search', route: 'price-check' },
+        { name: 'Müşteri Listesi', icon: 'list', route: 'customers' },
+        { name: 'Yeni Müşteri', icon: 'person_add', route: 'customers/new' },
+        { name: 'Müşteri Arama', icon: 'search', route: 'customers/search' },
       ],
     },
     {
@@ -71,35 +83,20 @@ export default class Sidebar {
         },
       ],
     },
-    {
-      name: 'Stok Yönetimi',
-      icon: 'inventory_2',
-      route: '',
-      children: [
-        { name: 'Ürün Listesi', icon: 'inventory', route: 'inventory' },
-        { name: 'Stok Girişi', icon: 'add_box', route: 'stock-in' },
-        {
-          name: 'Stok Çıkışı',
-          icon: 'remove_shopping_cart',
-          route: 'stock-out',
-        },
-        { name: 'Stok Sayımı', icon: 'fact_check', route: 'stock-count' },
-      ],
-    },
-    {
-      name: 'Raporlar',
-      icon: 'analytics',
-      route: '',
-      children: [
-        { name: 'Satış Raporları', icon: 'trending_up', route: 'reports' },
-        { name: 'Stok Raporları', icon: 'storage', route: 'stock-reports' },
-        {
-          name: 'Finansal Raporlar',
-          icon: 'account_balance',
-          route: 'financial-reports',
-        },
-      ],
-    },
+    // {
+    //   name: 'Raporlar',
+    //   icon: 'analytics',
+    //   route: '',
+    //   children: [
+    //     { name: 'Satış Raporları', icon: 'trending_up', route: 'reports' },
+    //     { name: 'Stok Raporları', icon: 'storage', route: 'stock-reports' },
+    //     {
+    //       name: 'Finansal Raporlar',
+    //       icon: 'account_balance',
+    //       route: 'financial-reports',
+    //     },
+    //   ],
+    // },
     {
       name: 'Ayarlar',
       icon: 'settings',

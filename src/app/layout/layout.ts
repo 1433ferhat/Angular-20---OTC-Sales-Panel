@@ -31,6 +31,7 @@ import { OrderStatus } from '@shared/enums/order-status.enum';
 import { PaymentMethod } from '@shared/enums/payment-method.enum';
 import { Common } from '../services/common';
 import { AuthService } from '../services/auth.service';
+import Header from './header/header';
 
 @Component({
   selector: 'app-layout',
@@ -40,6 +41,7 @@ import { AuthService } from '../services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    Header,
     CommonModule,
     RouterModule,
     RouterOutlet,
@@ -54,7 +56,7 @@ import { AuthService } from '../services/auth.service';
     OrderPanel,
   ],
 })
-export default class Layout implements OnInit {
+export default class Layout {
   private productStore = inject(ProductStore);
   private orderStore = inject(OrderStore);
   private categoryStore = inject(CategoryStore);
@@ -63,9 +65,6 @@ export default class Layout implements OnInit {
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
 
-  currentUser = computed(() => this.common.getCurrentUser());
-  currentUserName = computed(() => this.common.getFullName() || 'Kullanıcı');
-  currentUserInitials = computed(() => this.common.getUserInitials());
   isUserLoggedIn = computed(() => this.common.isLoggedIn());
 
   isOrderPanelOpen = signal(false);
@@ -87,60 +86,11 @@ export default class Layout implements OnInit {
       this.categoryStore.loading()
   );
 
-  lowStockProducts = computed(() => this.productStore.getLowStockProducts(10));
-  recentOrders = computed(() => this.orderStore.orders().slice(0, 5));
-
-  todaysSales = computed(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    return this.orderStore
-      .orders()
-      .filter((order) => {
-        if (!order.orderDate) return false;
-        const orderDate = new Date(order.orderDate);
-        orderDate.setHours(0, 0, 0, 0);
-        return (
-          orderDate.getTime() === today.getTime() &&
-          order.status === OrderStatus.Completed
-        );
-      })
-      .reduce((total, order) => total + order.totalPrice, 0);
-  });
-
-  notifications = computed(() => {
-    const lowStock = this.lowStockProducts();
-    const pendingOrders = this.orderStore
-      .orders()
-      .filter((order) => order.status === OrderStatus.Pending);
-
-    return [
-      ...lowStock.map((product) => ({
-        id: `low-stock-${product.id}`,
-        type: 'warning' as const,
-        message: `${product.name} stoku düşük`,
-      })),
-      ...pendingOrders.map((order) => ({
-        id: `pending-order-${order.id}`,
-        type: 'info' as const,
-        message: `Bekleyen sipariş: ${order.id}`,
-      })),
-    ];
-  });
-
-  ngOnInit() {
+  constructor() {
     this.authService.initializeUserFromToken();
-    this.loadInitialData();
-  }
-
-  private loadInitialData() {
     this.productStore.loadProducts();
     this.categoryStore.loadCategories();
     this.orderStore.loadOrders();
-  }
-
-  toggleSidebar() {
-    this.sidebarOpen.update((open) => !open);
   }
 
   toggleOrderPanel() {
@@ -216,9 +166,6 @@ export default class Layout implements OnInit {
     this.snackBar.open('Sipariş iptal edildi', 'Tamam', { duration: 2000 });
   }
 
-  logout() {
-    this.authService.logout();
-  }
   viewOrderDetails(order: OrderModel): void {
     console.log('Order Details:', order);
   }

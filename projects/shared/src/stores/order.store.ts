@@ -8,6 +8,7 @@ import { lastValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { OrderStatus } from '../enums/order-status.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
+import { PaginateModel } from '@shared/models/paginate.model';
 
 @Injectable({
   providedIn: 'root',
@@ -22,18 +23,11 @@ export class OrderStore {
   // Resource with error handling
   ordersResource = resource({
     loader: () =>
-      lastValueFrom(
-        this.http.get<OrderModel[]>('api/orders/getall').pipe(
-          catchError(error => {
-            console.warn('Orders API hatası:', error);
-            return of([]); // Boş array döndür
-          })
-        )
-      ),
+      lastValueFrom(this.http.get<PaginateModel<OrderModel>>('api/orders')),
   });
 
   // Computed signals
-  orders = computed(() => this.ordersResource.value() || []);
+  orders = computed(() => this.ordersResource.value()?.items || []);
   currentOrder = computed(() => this._currentOrder());
   cartItems = computed(() => this._cartItems());
   loading = computed(() => this.ordersResource.isLoading());
@@ -110,7 +104,9 @@ export class OrderStore {
   }
 
   // Order operations
-  async createOrder(orderData: Partial<OrderModel>): Promise<OrderModel | null> {
+  async createOrder(
+    orderData: Partial<OrderModel>
+  ): Promise<OrderModel | null> {
     try {
       const order: Partial<OrderModel> = {
         ...orderData,
@@ -123,7 +119,7 @@ export class OrderStore {
 
       const response = await lastValueFrom(
         this.http.post<OrderModel>('api/orders/create', order).pipe(
-          catchError(error => {
+          catchError((error) => {
             console.error('Order creation error:', error);
             return of(null);
           })
@@ -142,7 +138,10 @@ export class OrderStore {
     }
   }
 
-  async completeOrder(customer: CustomerModel, paymentMethod: PaymentMethod): Promise<boolean> {
+  async completeOrder(
+    customer: CustomerModel,
+    paymentMethod: PaymentMethod
+  ): Promise<boolean> {
     try {
       const orderData = {
         customerId: customer.id,
@@ -151,12 +150,12 @@ export class OrderStore {
         totalPrice: this.cartTotal(),
         totalQuantity: this.cartItemCount(),
         paymentMethod: paymentMethod,
-        status: OrderStatus.Completed
+        status: OrderStatus.Completed,
       };
 
       const response = await lastValueFrom(
         this.http.post<OrderModel>('api/orders/complete', orderData).pipe(
-          catchError(error => {
+          catchError((error) => {
             console.error('Order completion error:', error);
             return of(null);
           })
@@ -175,15 +174,20 @@ export class OrderStore {
     }
   }
 
-  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<boolean> {
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatus
+  ): Promise<boolean> {
     try {
       const response = await lastValueFrom(
-        this.http.put<OrderModel>(`api/orders/${orderId}/status`, { status }).pipe(
-          catchError(error => {
-            console.error('Order status update error:', error);
-            return of(null);
-          })
-        )
+        this.http
+          .put<OrderModel>(`api/orders/${orderId}/status`, { status })
+          .pipe(
+            catchError((error) => {
+              console.error('Order status update error:', error);
+              return of(null);
+            })
+          )
       );
 
       if (response) {
@@ -216,17 +220,18 @@ export class OrderStore {
   // Statistics
   getTotalSales(): number {
     return this.orders()
-      .filter(order => order.status === OrderStatus.Completed)
+      .filter((order) => order.status === OrderStatus.Completed)
       .reduce((total, order) => total + (order.totalPrice || 0), 0);
   }
 
   getTodaysSales(): number {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     return this.orders()
-      .filter(order => {
-        if (!order.orderDate || order.status !== OrderStatus.Completed) return false;
+      .filter((order) => {
+        if (!order.orderDate || order.status !== OrderStatus.Completed)
+          return false;
         const orderDate = new Date(order.orderDate);
         orderDate.setHours(0, 0, 0, 0);
         return orderDate.getTime() === today.getTime();
@@ -239,6 +244,6 @@ export class OrderStore {
   }
 
   getPendingOrdersCount(): number {
-    return this.orders().filter(o => o.status === OrderStatus.Pending).length;
+    return this.orders().filter((o) => o.status === OrderStatus.Pending).length;
   }
 }

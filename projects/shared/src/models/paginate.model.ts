@@ -1,3 +1,5 @@
+import { ProductModel } from './product.model';
+
 export interface PaginateModel<T> {
   count: number;
   hasNext: boolean;

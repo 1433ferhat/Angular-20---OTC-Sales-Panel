@@ -37,7 +37,7 @@
                       <h4>{{ customer.name }}</h4>
                       <p>{{ customer.phone }}</p>
                       <p>{{ customer.email }}</p>
-                      <span class="price-type">{{ priceTypeOptions.find(p => p.value === customer.priceType)?.label }}</span>
+                      <span class="price-type">{{ getPriceTypeLabel(customer.priceType) }}</span>
                     </div>
                     <mat-icon>arrow_forward_ios</mat-icon>
                   </mat-list-item>
@@ -73,7 +73,7 @@
             <mat-form-field appearance="outline">
               <mat-label>Fiyat Tipi *</mat-label>
               <mat-select [(ngModel)]="customerData.priceType" required>
-                <mat-option *ngFor="let option of priceTypeOptions" [value]="option.value">
+                <mat-option *ngFor="let option of getPriceTypeOptions()" [value]="option.value">
                   {{ option.label }}
                 </mat-option>
               </mat-select>
