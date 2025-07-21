@@ -1,0 +1,164 @@
+/* src/app/pages/customers/customers.scss */
+.customers-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 500;
+    }
+  }
+
+  .search-card {
+    margin-bottom: 24px;
+
+    mat-form-field {
+      width: 100%;
+      max-width: 400px;
+    }
+  }
+
+  .form-card {
+    margin-bottom: 24px;
+
+    mat-card-header {
+      margin-bottom: 16px;
+
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+
+      .customer-type-section {
+        grid-column: 1 / -1;
+        margin: 8px 0;
+
+        label {
+          display: block;
+          font-weight: 500;
+          margin-bottom: 8px;
+          color: rgba(0, 0, 0, 0.87);
+        }
+
+        mat-radio-group {
+          display: flex;
+          gap: 16px;
+        }
+      }
+
+      .einvoice-section {
+        grid-column: 1 / -1;
+        margin: 8px 0;
+      }
+    }
+
+    mat-card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+  }
+
+  .table-card {
+    .no-data {
+      text-align: center;
+      padding: 48px 24px;
+      color: rgba(0, 0, 0, 0.6);
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+      }
+
+      p {
+        margin: 0;
+        font-size: 16px;
+      }
+    }
+
+    .customers-table {
+      width: 100%;
+
+      th {
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.87);
+      }
+
+      td, th {
+        padding: 12px 8px;
+      }
+
+      .price-type-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .mat-column-actions {
+        width: 120px;
+        text-align: center;
+      }
+
+      .mat-column-type {
+        width: 100px;
+      }
+
+      .mat-column-priceType {
+        width: 140px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .customers-page {
+    padding: 16px;
+
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+
+      h1 {
+        font-size: 20px;
+      }
+    }
+
+    .customers-table {
+      font-size: 14px;
+
+      td, th {
+        padding: 8px 4px;
+      }
+    }
+  }
+}

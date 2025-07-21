@@ -33,6 +33,10 @@ export const routes: Routes = [
         title: 'Hızlı Satış - OTC Satış',
       },
       {
+        path: 'customers',
+        loadComponent: () => import('./pages/customer/customer'),
+      },
+      {
         path: 'price-check',
         loadComponent: () => import('./pages/home/home'),
         title: 'Fiyat Sorgula - OTC Satış',

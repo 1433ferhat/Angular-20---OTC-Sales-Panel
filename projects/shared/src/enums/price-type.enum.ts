@@ -20,3 +20,40 @@ export enum PriceType {
   T4 = 18,
   T5 = 19
 }
+
+// PriceType utility functions
+export const PriceTypeLabels: Record<PriceType, string> = {
+  [PriceType.Undefined]: 'Tanımsız',
+  [PriceType.ZON]: 'Zon Fiyatı',
+  [PriceType.LZON]: 'L-Zon Fiyatı',
+  [PriceType.E1]: 'E1 Fiyatı',
+  [PriceType.NV]: 'NV Fiyatı',
+  [PriceType.FB]: 'FB Fiyatı',
+  [PriceType.TY]: 'TY Fiyatı',
+  [PriceType.HB]: 'HB Fiyatı',
+  [PriceType.N11]: 'N11 Fiyatı',
+  [PriceType.PTT]: 'PTT Fiyatı',
+  [PriceType.AMZ]: 'AMZ Fiyatı',
+  [PriceType.PZR]: 'PZR Fiyatı',
+  [PriceType.IDE]: 'IDE Fiyatı',
+  [PriceType.ETIC]: 'ETIC Fiyatı',
+  [PriceType.ECZ]: 'Eczane Fiyatı',
+  [PriceType.T1]: 'T1 Fiyatı',
+  [PriceType.T2]: 'T2 Fiyatı',
+  [PriceType.T3]: 'T3 Fiyatı',
+  [PriceType.T4]: 'T4 Fiyatı',
+  [PriceType.T5]: 'T5 Fiyatı',
+};
+
+export function getPriceTypeLabel(priceType: PriceType): string {
+  return PriceTypeLabels[priceType] || 'Bilinmeyen';
+}
+
+export function getPriceTypeOptions() {
+  return Object.entries(PriceTypeLabels)
+    .filter(([key]) => Number(key) !== PriceType.Undefined)
+    .map(([value, label]) => ({
+      value: Number(value) as PriceType,
+      label
+    }));
+}

@@ -1,4 +1,5 @@
-import { Component, Inject, signal } from '@angular/core';
+// src/app/components/customer-selection/customer-selection.ts - Updated with enum utils
+import { Component, Inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -13,13 +14,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatListModule } from '@angular/material/list';
+import { MatTabsModule } from '@angular/material/tabs';
 import { CustomerModel } from '@shared/models/customer.model';
-import { PriceType } from '@shared/enums/price-type.enum';
+import { PriceType, getPriceTypeLabel, getPriceTypeOptions } from '@shared/enums/price-type.enum';
 
 @Component({
   selector: 'app-customer-selection',
   templateUrl: './customer-selection.html',
-  styleUrl: './customer-seleciton.scss',
+  styleUrl: './customer-selection.scss',
   standalone: true,
   imports: [
     CommonModule,
@@ -32,88 +35,91 @@ import { PriceType } from '@shared/enums/price-type.enum';
     MatIconModule,
     MatCheckboxModule,
     MatRadioModule,
+    MatListModule,
+    MatTabsModule,
   ],
 })
-export default class CustomerSelection {
+export default class CustomerSelection implements OnInit {
+  selectedTabIndex = signal(0);
+  searchQuery = signal('');
+  
   customerData: Partial<CustomerModel> = {
     name: '',
     phone: '',
     email: '',
     isEInvoice: true,
-    priceType: PriceType.ECZ, // Default eczane fiyatı
+    priceType: PriceType.ECZ,
   };
 
-  // Enum'ları template'te kullanabilmek için
+  savedCustomers: CustomerModel[] = [];
+  filteredCustomers = signal<CustomerModel[]>([]);
+
   PriceType = PriceType;
   isCorporate = signal(false);
-
-  // Fiyat tipi seçenekleri
-  priceTypeOptions = [
-    { value: PriceType.ECZ, label: 'Eczane Fiyatı' },
-    { value: PriceType.ZON, label: 'Zon Fiyatı' },
-    { value: PriceType.LZON, label: 'L-Zon Fiyatı' },
-    { value: PriceType.E1, label: 'E1 Fiyatı' },
-    { value: PriceType.NV, label: 'NV Fiyatı' },
-    { value: PriceType.T1, label: 'T1 Fiyatı' },
-    { value: PriceType.T2, label: 'T2 Fiyatı' },
-    { value: PriceType.T3, label: 'T3 Fiyatı' },
-  ];
 
   constructor(
     public dialogRef: MatDialogRef<CustomerSelection>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
-  // Kurumsal/Bireysel değişiminde form temizle
+  ngOnInit() {
+    this.loadSavedCustomers();
+    this.filterCustomers();
+  }
+
+  loadSavedCustomers() {
+    const saved = localStorage.getItem('customers');
+    this.savedCustomers = saved ? JSON.parse(saved) : [];
+    this.filteredCustomers.set(this.savedCustomers);
+  }
+
+  filterCustomers() {
+    const query = this.searchQuery().toLowerCase();
+    if (!query) {
+      this.filteredCustomers.set(this.savedCustomers);
+      return;
+    }
+
+    const filtered = this.savedCustomers.filter(customer =>
+      customer.name.toLowerCase().includes(query) ||
+      customer.phone.includes(query) ||
+      customer.email.toLowerCase().includes(query)
+    );
+    this.filteredCustomers.set(filtered);
+  }
+
+  selectExistingCustomer(customer: CustomerModel) {
+    this.dialogRef.close(customer);
+  }
+
   onCustomerTypeChange() {
     if (this.isCorporate()) {
-      // Kurumsal seçildi
       this.customerData.tcNo = undefined;
     } else {
-      // Bireysel seçildi
       this.customerData.taxOffice = undefined;
       this.customerData.taxNo = undefined;
     }
   }
 
-  // Form validasyonu
   isFormValid(): boolean {
-    const {
-      name,
-      phone,
-      email,
-      isEInvoice,
-      tcNo,
-      taxOffice,
-      taxNo,
-      priceType,
-    } = this.customerData;
+    const { name, phone, email, tcNo, taxOffice, taxNo, priceType } = this.customerData;
 
-    // Temel alanlar kontrolü
     if (!name || !phone || !email || priceType === undefined) {
       return false;
     }
 
-    // Kurumsal ise
     if (this.isCorporate()) {
       return !!(taxOffice && taxNo && taxNo.length === 10);
-    }
-    // Bireysel ise
-    else {
+    } else {
       return !!(tcNo && tcNo.length === 11);
     }
   }
 
-  // E-fatura checkbox değişimi
   onEInvoiceChange() {
-    // E-fatura seçilirse otomatik olarak gerekli alanları göster
+    // E-fatura değişikliği
   }
 
-  onCancel() {
-    this.dialogRef.close();
-  }
-
-  onConfirm() {
+  saveNewCustomer() {
     if (this.isFormValid()) {
       const customer: CustomerModel = {
         id: crypto.randomUUID(),
@@ -132,7 +138,19 @@ export default class CustomerSelection {
             }),
       };
 
+      // LocalStorage'a kaydet
+      this.savedCustomers.push(customer);
+      localStorage.setItem('customers', JSON.stringify(this.savedCustomers));
+
       this.dialogRef.close(customer);
     }
   }
+
+  onCancel() {
+    this.dialogRef.close();
+  }
+
+  // Enum utility functions
+  getPriceTypeLabel = getPriceTypeLabel;
+  getPriceTypeOptions = getPriceTypeOptions;
 }
