@@ -1,0 +1,69 @@
+.customer-create-page {
+  padding: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  .page-header {
+    margin-bottom: 24px;
+
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      font-size: 24px;
+      font-weight: 500;
+    }
+  }
+
+  .form-card {
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+
+      .customer-type-section {
+        grid-column: 1 / -1;
+        margin: 8px 0;
+
+        label {
+          display: block;
+          font-weight: 500;
+          margin-bottom: 8px;
+          color: rgba(0, 0, 0, 0.87);
+        }
+
+        mat-radio-group {
+          display: flex;
+          gap: 16px;
+        }
+      }
+
+      .einvoice-section {
+        grid-column: 1 / -1;
+        margin: 8px 0;
+      }
+    }
+
+    mat-card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .customer-create-page {
+    padding: 16px;
+
+    .page-header h1 {
+      font-size: 20px;
+    }
+  }
+}

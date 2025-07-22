@@ -29,12 +29,12 @@ export const routes: Routes = [
       },
       {
         path: 'urunler',
-        loadComponent: () => import('./pages/inventory/inventory'),
         title: 'Fiyat Sorgula - OTC Satış',
+        loadChildren:()=>import('./pages/customer/customer.routes')
       },
       {
         path: 'musteriler',
-        loadComponent: () => import('./pages/customer/customer'),
+        loadChildren: () => import('./pages/customer/customer.routes'),
       },
       {
         path: 'orders',

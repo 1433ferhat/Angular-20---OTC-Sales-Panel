@@ -1,17 +1,16 @@
-<!-- src/app/pages/customers/customers.html -->
 <div class="customers-page">
   <div class="page-header">
     <h1>
       <mat-icon>people</mat-icon>
       Müşteri Yönetimi
     </h1>
-    <button mat-raised-button color="primary" (click)="showAddForm()">
+    <button mat-raised-button color="primary" (click)="addCustomer()">
       <mat-icon>person_add</mat-icon>
       Yeni Müşteri
     </button>
   </div>
 
-  <!-- Arama ve Filtreler -->
+  <!-- Arama -->
   <mat-card class="search-card">
     <mat-form-field appearance="outline">
       <mat-label>Müşteri Ara</mat-label>
@@ -22,122 +21,22 @@
     </mat-form-field>
   </mat-card>
 
-  <!-- Müşteri Formu -->
-  @if (showForm()) {
-    <mat-card class="form-card">
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>{{ isEditing() ? 'edit' : 'person_add' }}</mat-icon>
-          {{ isEditing() ? 'Müşteri Düzenle' : 'Yeni Müşteri Ekle' }}
-        </mat-card-title>
-      </mat-card-header>
-
-      <mat-card-content>
-        <div class="form-grid">
-          <!-- Temel Bilgiler -->
-          <mat-form-field appearance="outline">
-            <mat-label>Ad Soyad *</mat-label>
-            <input matInput [(ngModel)]="customerForm.name" required>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Cep Telefonu *</mat-label>
-            <input matInput [(ngModel)]="customerForm.phone" required>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>E-Posta *</mat-label>
-            <input matInput type="email" [(ngModel)]="customerForm.email" required>
-          </mat-form-field>
-
-          <!-- Fiyat Tipi -->
-          <mat-form-field appearance="outline">
-            <mat-label>Fiyat Tipi *</mat-label>
-            <mat-select [(ngModel)]="customerForm.priceType" required>
-              <mat-option *ngFor="let option of getPriceTypeOptions()" [value]="option.value">
-                {{ option.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <!-- Müşteri Tipi -->
-          <div class="customer-type-section">
-            <label>Müşteri Tipi *</label>
-            <mat-radio-group [value]="isCorporate()" (change)="onCustomerTypeChange($event.value)">
-              <mat-radio-button [value]="false">Bireysel</mat-radio-button>
-              <mat-radio-button [value]="true">Kurumsal</mat-radio-button>
-            </mat-radio-group>
-          </div>
-
-          <!-- Bireysel Müşteri -->
-          @if (!isCorporate()) {
-            <mat-form-field appearance="outline">
-              <mat-label>T.C. Kimlik No *</mat-label>
-              <input matInput 
-                     [(ngModel)]="customerForm.tcNo" 
-                     maxlength="11" 
-                     pattern="[0-9]*"
-                     required>
-              <mat-hint>11 haneli T.C. kimlik numarası</mat-hint>
-            </mat-form-field>
-          }
-
-          <!-- Kurumsal Müşteri -->
-          @if (isCorporate()) {
-            <mat-form-field appearance="outline">
-              <mat-label>Vergi Dairesi *</mat-label>
-              <input matInput [(ngModel)]="customerForm.taxOffice" required>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Vergi Numarası *</mat-label>
-              <input matInput 
-                     [(ngModel)]="customerForm.taxNo" 
-                     maxlength="10"
-                     pattern="[0-9]*"
-                     required>
-              <mat-hint>10 haneli vergi numarası</mat-hint>
-            </mat-form-field>
-          }
-
-          <!-- E-Fatura -->
-          <div class="einvoice-section">
-            <mat-checkbox [(ngModel)]="customerForm.isEInvoice">
-              E-Fatura Mükellefi
-            </mat-checkbox>
-          </div>
-        </div>
-      </mat-card-content>
-
-      <mat-card-actions>
-        <button mat-button (click)="cancelForm()">
-          <mat-icon>close</mat-icon>
-          İptal
-        </button>
-        <button mat-raised-button color="primary" [disabled]="!isFormValid()" (click)="saveCustomer()">
-          <mat-icon>save</mat-icon>
-          {{ isEditing() ? 'Güncelle' : 'Kaydet' }}
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  }
-
   <!-- Müşteri Listesi -->
   <mat-card class="table-card">
     <mat-card-header>
       <mat-card-title>
-        Müşteriler ({{ filteredCustomers().length }})
+        Müşteriler ({{ filteredCustomers.length }})
       </mat-card-title>
     </mat-card-header>
 
     <mat-card-content>
-      @if (filteredCustomers().length === 0) {
+      @if (filteredCustomers.length === 0) {
         <div class="no-data">
           <mat-icon>people_outline</mat-icon>
           <p>Müşteri bulunamadı</p>
         </div>
       } @else {
-        <table mat-table [dataSource]="filteredCustomers()" class="customers-table">
+        <table mat-table [dataSource]="filteredCustomers" class="customers-table">
           <!-- Ad Soyad -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Ad Soyad</th>
