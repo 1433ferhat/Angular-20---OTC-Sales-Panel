@@ -17,6 +17,8 @@ import { OrderItemModel } from '@shared/models/order-item.model';
 import { initialOrder, OrderModel } from '@shared/models/order.model';
 import { CustomerStore } from '@shared/stores/customer.store';
 import { OrderStore } from '@shared/stores/order.store';
+import BarcodeScanner from '../barcode-scanner/barcode-scanner';
+import { ProductModel } from '@shared/models/product.model';
 
 @Component({
   selector: 'app-order-panel',
@@ -25,7 +27,13 @@ import { OrderStore } from '@shared/stores/order.store';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [MatCardModule, MatIconModule, CurrencyPipe, MatMenuModule],
+  imports: [
+    BarcodeScanner,
+    MatCardModule,
+    MatIconModule,
+    CurrencyPipe,
+    MatMenuModule,
+  ],
 })
 export default class OrderPanel {
   readonly #customerStore = inject(CustomerStore);
@@ -39,6 +47,10 @@ export default class OrderPanel {
   readonly cartTotal = computed<number>(() =>
     this.items().reduce((sum, i) => sum + i.totalPrice, 0)
   );
+
+  addItem(product: ProductModel) {
+    this.items.set();
+  }
 
   getBarcodeText(barcodes?: { value: string }[]): string {
     if (!barcodes || barcodes.length === 0) return '';
