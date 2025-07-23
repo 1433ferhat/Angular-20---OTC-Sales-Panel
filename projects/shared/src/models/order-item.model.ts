@@ -7,6 +7,5 @@ export interface OrderItemModel {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  expiration?: Date;
   product: ProductModel | undefined;
 }

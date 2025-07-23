@@ -8,6 +8,7 @@ import { first, firstValueFrom, lastValueFrom, Observable } from 'rxjs';
 })
 export class CustomerStore {
   private http = inject(HttpClient);
+  readonly customer = signal<CustomerModel | undefined>(undefined);
 
   // Resource for customers (Angular 20 approach)
   customersResource = resource({
@@ -20,11 +21,9 @@ export class CustomerStore {
   loading = computed(() => this.customersResource.isLoading());
   error = computed(() => this.customersResource.error());
 
-  // CRUD operations
-  getCustomerById(id: string): Promise<CustomerModel> {
-    return lastValueFrom(this.http.get<CustomerModel>(`api/customers/${id}`));
+  selectCustomer(id: string) {
+    this.customer.set(this.customers().find((c) => c.id == id));
   }
-
   async createCustomer(customer: CustomerModel): Promise<CustomerModel> {
     const result = await firstValueFrom(
       this.http.post<CustomerModel>('api/customers', customer)

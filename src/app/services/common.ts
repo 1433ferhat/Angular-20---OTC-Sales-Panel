@@ -1,4 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
+import { CustomerModel } from '@shared/models/customer.model';
 import { UserModel } from '@shared/models/user.model';
 
 @Injectable({
@@ -6,8 +7,7 @@ import { UserModel } from '@shared/models/user.model';
 })
 export class Common {
   // Sadece user state'i tut
-  user = signal<UserModel | undefined>(undefined);
-
+  readonly user = signal<UserModel | undefined>(undefined);
   // Computed değerler
   readonly isLoggedIn = computed(() => !!this.user());
   readonly currentUserName = computed(() => this.user()?.name || '');

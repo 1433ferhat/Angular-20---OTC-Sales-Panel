@@ -15,3 +15,16 @@ export interface OrderModel {
   status: OrderStatus;
   paymentMethod?: PaymentMethod;
 }
+
+export const initialOrder: OrderModel = {
+  id: undefined,
+  documentNumber: undefined,
+  orderDate: undefined,
+  customerId: undefined,
+  customer: undefined,
+  items: [],
+  totalPrice: 0,
+  totalQuantity: 0,
+  status: OrderStatus.Pending,
+  paymentMethod: PaymentMethod.Cash,
+};

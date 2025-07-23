@@ -1,0 +1,113 @@
+<!-- src/app/components/order-panel/order-panel.html -->
+<div class="order-panel">
+  <mat-card class="panel-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>shopping_cart</mat-icon>
+        Sepet ({{ items().length }})
+      </mat-card-title>
+    </mat-card-header>
+  </mat-card>
+
+  <div class="panel-content">
+    <!-- Müşteri Seçimi -->
+    <mat-card class="customer-section">
+      @if (selectCustomer()) {
+      <div class="selected-customer">
+        <div class="customer-info">
+          <h4>{{ selectCustomer()?.firstName +" "+ selectCustomer()?.firstName}}</h4>
+          <p>{{ selectCustomer()?.phone }}</p>
+          <span class="price-type">{{ getPriceTypeText(selectCustomer()?.type!) }}</span>
+        </div>
+        <button mat-icon-button (click)="selectCustomer()" matTooltip="Müşteri Değiştir">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+      } @else {
+      <button mat-raised-button color="primary" (click)="selectCustomer()">
+        <mat-icon>person_add</mat-icon>
+        Müşteri Seç
+      </button>
+      }
+    </mat-card>
+
+    <!-- Sepet İçeriği -->
+    <div class="cart-items">
+      @if (items().length === 0) {
+      <div class="empty-cart">
+        <mat-icon>shopping_cart_checkout</mat-icon>
+        <p>Sepet boş</p>
+      </div>
+      } @else {
+      @for (item of items(); track item.id) {
+      <mat-card class="cart-item">
+        <div class="item-info">
+          <h4>{{ item.product?.name }}</h4>
+          <p class="item-category">{{ item.product?.category }}</p>
+          <p class="item-barcode">{{ getBarcodeText(item.product?.barcodes) }}</p>
+        </div>
+
+        <div class="item-controls">
+          <div class="quantity-controls">
+            <button mat-icon-button (click)="changeQuantity(item.id, -1)" [disabled]="item.quantity  <= 1">
+              <mat-icon>remove</mat-icon>
+            </button>
+
+            <input type="number" class="quantity-input" [value]="item.quantity"
+              (blur)="updateQuantityManual(item.id, $event)" min="1" max="999">
+
+            <button mat-icon-button (click)="changeQuantity(item.id, 1)">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+
+          <div class="item-price">
+            <span class="unit-price">{{ item.unitPrice | currency:'TRY':'symbol':'1.2-2' }}</span>
+            <span class="total-price">{{ item.totalPrice | currency:'TRY':'symbol':'1.2-2' }}</span>
+          </div>
+
+          <button mat-icon-button color="warn" (click)="removeItem(item.id)" matTooltip="Sepetten Çıkar">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </mat-card>
+      }
+      }
+    </div>
+  </div>
+
+  <!-- Toplam ve İşlemler -->
+  <div class="panel-footer">
+    <div class="total-section">
+      <div class="total-info">
+        <span class="total-label">Toplam:</span>
+        <span class="total-amount">{{ cartTotal() | currency:'TRY':'symbol':'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button mat-raised-button color="warn" (click)="cancelOrder()" [disabled]="items().length === 0">
+        <mat-icon>clear</mat-icon>
+        İptal
+      </button>
+
+      <button mat-raised-button color="primary" [matMenuTriggerFor]="paymentMenu"
+        [disabled]="items().length === 0 || !selectCustomer()">
+        <mat-icon>payment</mat-icon>
+        Ödeme
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Ödeme Menüsü -->
+<mat-menu #paymentMenu="matMenu">
+  <button mat-menu-item (click)="completeOrder(PaymentMethod.Cash)">
+    <mat-icon>payments</mat-icon>
+    <span>Nakit</span>
+  </button>
+  <button mat-menu-item (click)="completeOrder(PaymentMethod.CreditCard)">
+    <mat-icon>credit_card</mat-icon>
+    <span>Kredi Kartı</span>
+  </button>
+</mat-menu>

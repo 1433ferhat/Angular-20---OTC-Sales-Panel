@@ -46,7 +46,6 @@ export class OrderStore {
     return this._cartItems().reduce((count, item) => count + item.quantity, 0);
   });
 
-  constructor() {}
 
   // Actions
   loadOrders() {

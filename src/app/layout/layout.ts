@@ -20,6 +20,7 @@ import { CustomerStore } from '@shared/stores/customer.store';
 import { CustomerModel } from '@shared/models/customer.model';
 import { Common } from '../services/common';
 import { AuthService } from '../services/auth.service';
+import { OrderItemModel } from '@shared/models/order-item.model';
 
 @Component({
   selector: 'app-layout',
@@ -39,12 +40,18 @@ import { AuthService } from '../services/auth.service';
   ],
 })
 export default class Layout {
+  
+  
+  
+  onSidebarToggle() {
+    this.sidebarOpen.update((open) => !open);
+  }
+
   private productStore = inject(ProductStore);
   private orderStore = inject(OrderStore);
   private customerStore = inject(CustomerStore);
   private categoryStore = inject(CategoryStore);
   private common = inject(Common);
-  private authService = inject(AuthService);
 
   isUserLoggedIn = computed(() => this.common.isLoggedIn());
 
@@ -63,44 +70,14 @@ export default class Layout {
     () =>
       this.productStore.loading() ||
       this.orderStore.loading() ||
-      this.categoryStore.loading()
+      this.categoryStore.loading() ||
+      this.customerStore.loading()
   );
 
   constructor() {
-    this.authService.initializeUserFromToken();
     this.productStore.loadProducts();
     this.categoryStore.loadCategories();
     this.orderStore.loadOrders();
-
-    // Müşteri değiştiğinde fiyatları güncelle
-    this.setupCustomerPriceSync();
-  }
-
-  private setupCustomerPriceSync() {
-    // Signal effect kullanarak müşteri değişimini izle
-    // Bu şekilde müşteri her değiştiğinde fiyatlar otomatik güncellenecek
-    const customerEffect = () => {
-      const customer = this.selectedCustomer();
-      if (customer) {
-        // Müşteri seçildiğinde o müşteri tipine göre fiyatları güncelle
-        this.productStore.updateProductPricesForCustomer(customer.type);
-        console.log('Fiyatlar güncellendi:', customer.type);
-      }
-    };
-
-    // Signal effect'i manuel olarak çalıştırıyoruz
-    // Angular 17+'da computed kullanabiliriz
-    const previousCustomer = null;
-    setInterval(() => {
-      const currentCustomer = this.selectedCustomer();
-      if (currentCustomer !== previousCustomer) {
-        customerEffect();
-      }
-    }, 100);
-  }
-
-  // Header event handler
-  onSidebarToggle() {
-    this.sidebarOpen.update((open) => !open);
+    this.customerStore.customersResource.reload();
   }
 }
