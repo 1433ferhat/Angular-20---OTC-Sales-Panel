@@ -23,6 +23,11 @@ export const routes: Routes = [
         title: 'Satış Yap - OTC Satış',
       },
       {
+        path: 'customer',
+        loadComponent: () => import('./components/customer-selection/customer-selection'),
+        title: 'Satış Yap - OTC Satış',
+      },
+      {
         path: 'siparisler',
         loadChildren: () => import('./pages/orders/orders.routes'),
       },

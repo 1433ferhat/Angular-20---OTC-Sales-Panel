@@ -12,7 +12,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import OrderList from '../../components/order-list/order-list';
 import Layout from '../../layout/layout';
-import { OrderModel } from '@shared/models/order.model';
 
 @Component({
   selector: 'app-orders',
@@ -25,11 +24,5 @@ import { OrderModel } from '@shared/models/order.model';
 })
 export default class Orders {
   private layout = inject(Layout);
-
-  // 'orderHistory' yerine 'orders' kullanılmalı
   orders = computed(() => this.layout.orders());
-
-  onOrderSelected(order: OrderModel) {
-    this.layout.viewOrderDetails(order);
-  }
 }
