@@ -1,136 +1,351 @@
 /* src/app/components/customer-selection/customer-selection.scss */
 .customer-dialog {
-  width: 600px;
-  max-height: 80vh;
+  width: 700px;
+  max-height: 90vh;
 
   h2 {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 0;
+    color: #1976d2;
   }
 
   .tab-content {
     padding: 16px 0;
-    min-height: 400px;
+    min-height: 500px;
   }
 
+  // Arama bölümü
   .search-field {
     width: 100%;
     margin-bottom: 16px;
   }
 
+  // Müşteri listesi
   .customer-list {
-    max-height: 350px;
+    max-height: 400px;
     overflow-y: auto;
+  }
 
-    .customer-item {
-      cursor: pointer;
-      transition: background-color 0.2s;
-      padding: 12px 16px;
+  .customer-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
-      &:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-      }
+  .customer-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid #e0e0e0;
 
-      .customer-info {
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+      border-color: #1976d2;
+    }
+
+    .customer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+
+      .customer-main-info {
         flex: 1;
 
-        h4 {
-          margin: 0 0 4px 0;
-          font-weight: 500;
+        h3 {
+          margin: 0 0 8px 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #333;
         }
 
-        p {
-          margin: 2px 0;
-          color: rgba(0, 0, 0, 0.6);
-          font-size: 14px;
-        }
+        .customer-badges {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
 
-        .price-type {
-          background: #e3f2fd;
-          color: #1976d2;
-          padding: 2px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          font-weight: 500;
+          .customer-type-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+
+            &.individual {
+              background: #e8f5e8;
+              color: #2e7d32;
+            }
+
+            &.corporate {
+              background: #e3f2fd;
+              color: #1976d2;
+            }
+          }
+
+          .price-type-badge {
+            background: #fff3e0;
+            color: #f57c00;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+          }
         }
       }
 
-      mat-icon {
-        color: rgba(0, 0, 0, 0.38);
+      .select-icon {
+        color: #1976d2;
+        font-size: 18px;
+      }
+    }
+
+    .customer-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: #666;
+
+        mat-icon {
+          font-size: 16px;
+          color: #999;
+        }
       }
     }
   }
 
-  .no-customers {
+  // Boş durumlar
+  .no-customers,
+  .no-results {
     text-align: center;
-    padding: 40px 20px;
-    color: rgba(0, 0, 0, 0.6);
+    padding: 60px 20px;
+    color: #666;
 
     mat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
       margin-bottom: 16px;
+      color: #ddd;
+    }
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      color: #333;
     }
 
     p {
-      margin: 8px 0;
-    }
-
-    .subtitle {
+      margin: 8px 0 16px 0;
       font-size: 14px;
-      color: rgba(0, 0, 0, 0.4);
+      color: #666;
     }
   }
 
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  // Form bölümü
+  .customer-form {
+    .form-section {
+      margin-bottom: 24px;
 
-    @media (max-width: 600px) {
-      grid-template-columns: 1fr;
-    }
-
-    mat-form-field {
-      width: 100%;
-
-      &:first-child,
-      &:nth-child(3) {
-        grid-column: 1 / -1;
-      }
-    }
-
-    .customer-type-section {
-      grid-column: 1 / -1;
-      margin: 8px 0;
-
-      label {
-        display: block;
-        font-weight: 500;
-        margin-bottom: 8px;
-        color: rgba(0, 0, 0, 0.87);
-      }
-
-      mat-radio-group {
+      .section-title {
         display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+
+        mat-icon {
+          color: #1976d2;
+        }
+      }
+    }
+
+    .form-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+
+      &.two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 16px;
       }
+
+      .full-width {
+        width: 100%;
+      }
+
+      mat-form-field {
+        flex: 1;
+      }
     }
 
-    .einvoice-section {
-      grid-column: 1 / -1;
-      margin: 8px 0;
+    // Müşteri tipi radio
+    .customer-type-radio {
+      display: flex;
+      gap: 16px;
+      margin: 16px 0;
+
+      .customer-type-option {
+        flex: 1;
+        padding: 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: #1976d2;
+          background: #f5f5f5;
+        }
+
+        &.mat-radio-checked {
+          border-color: #1976d2;
+          background: #e3f2fd;
+        }
+
+        .radio-content {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+
+          mat-icon {
+            font-size: 24px;
+            color: #1976d2;
+          }
+
+          div {
+            flex: 1;
+
+            strong {
+              display: block;
+              font-size: 14px;
+              font-weight: 600;
+              color: #333;
+              margin-bottom: 4px;
+            }
+
+            p {
+              margin: 0;
+              font-size: 12px;
+              color: #666;
+            }
+          }
+        }
+      }
+    }
+
+    // E-fatura checkbox
+    .einvoice-checkbox {
+      .checkbox-content {
+        strong {
+          display: block;
+          font-size: 14px;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 4px;
+        }
+
+        p {
+          margin: 0;
+          font-size: 12px;
+          color: #666;
+        }
+      }
     }
   }
 
+  // Dialog actions
   mat-dialog-actions {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
     padding: 16px 24px 24px;
     margin: 0;
+    border-top: 1px solid #e0e0e0;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .customer-dialog {
+    width: 100%;
+    max-width: 95vw;
+
+    .tab-content {
+      padding: 12px 0;
+    }
+
+    .customer-form {
+      .form-row.two-column {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .customer-type-radio {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    .customer-card {
+      .customer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+
+        .select-icon {
+          align-self: flex-end;
+        }
+      }
+    }
+  }
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .customer-dialog {
+    .customer-card {
+      background: #424242;
+      border-color: #555;
+
+      &:hover {
+        border-color: #1976d2;
+      }
+
+      .customer-header .customer-main-info h3 {
+        color: #ffffff;
+      }
+
+      .customer-details .detail-item {
+        color: #b3b3b3;
+      }
+    }
+
+    .customer-form .section-title {
+      color: #ffffff;
+    }
+
+    .no-customers,
+    .no-results {
+      h3 {
+        color: #ffffff;
+      }
+    }
   }
 }
