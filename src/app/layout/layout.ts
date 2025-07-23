@@ -25,6 +25,7 @@ import { CustomerModel } from '@shared/models/customer.model';
 import { PaymentMethod } from '@shared/enums/payment-method.enum';
 import { Common } from '../services/common';
 import { AuthService } from '../services/auth.service';
+import { CustomerStore } from '@shared/stores/customer.store';
 
 @Component({
   selector: 'app-layout',
@@ -46,13 +47,12 @@ import { AuthService } from '../services/auth.service';
 export default class Layout {
   private productStore = inject(ProductStore);
   private orderStore = inject(OrderStore);
+  private customerStore = inject(CustomerStore);
   private categoryStore = inject(CategoryStore);
+
   private snackBar = inject(MatSnackBar);
-  private common = inject(Common);
   private authService = inject(AuthService);
   private dialog = inject(MatDialog);
-
-  isUserLoggedIn = computed(() => this.common.isLoggedIn());
 
   sidebarOpen = signal(true);
   selectedCustomer = signal<CustomerModel | null>(null);
@@ -69,7 +69,9 @@ export default class Layout {
     () =>
       this.productStore.loading() ||
       this.orderStore.loading() ||
-      this.categoryStore.loading()
+      this.categoryStore.loading() ||
+      this.orderStore.loading() ||
+      this.customerStore.loading()
   );
 
   constructor() {
@@ -77,78 +79,15 @@ export default class Layout {
     this.productStore.loadProducts();
     this.categoryStore.loadCategories();
     this.orderStore.loadOrders();
+    this.customerStore.customersResource.reload();
   }
 
   // Header event handler
   onSidebarToggle() {
-    this.sidebarOpen.update(open => !open);
+    this.sidebarOpen.update((open) => !open);
   }
+  
 
-  addToCart(product: ProductModel) {
-    this.orderStore.addToCart(product, 1);
-    this.snackBar.open(`${product.name} sepete eklendi`, 'Tamam', {
-      duration: 2000,
-    });
-  }
-
-  updateQuantity(productId: string, change: number) {
-    const cartItems = this.cartItems();
-    const item = cartItems.find((i) => i.productId === productId);
-    if (item) {
-      const newQuantity = Math.max(1, item.quantity + change);
-      this.orderStore.updateCartItemQuantity(item.id, newQuantity);
-    }
-  }
-
-  removeFromCart(productId: string) {
-    this.orderStore.removeFromCart(productId);
-    this.snackBar.open('Ürün sepetten çıkarıldı', 'Tamam', { duration: 2000 });
-  }
-
-  selectCustomer() {
-    const dialogRef = this.dialog.open(CustomerSelection, {
-      width: '600px',
-      data: {},
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.selectedCustomer.set(result);
-        this.productStore.updateProductPricesForCustomer(result.priceType);
-      }
-    });
-  }
-
-  async completeOrder(paymentMethod: PaymentMethod) {
-    const customer = this.selectedCustomer();
-    if (!customer) {
-      this.snackBar.open('Lütfen müşteri seçin', 'Tamam', { duration: 3000 });
-      return;
-    }
-
-    const cartItems = this.cartItems();
-    if (cartItems.length === 0) {
-      this.snackBar.open('Sepet boş', 'Tamam', { duration: 3000 });
-      return;
-    }
-
-    const order = await this.orderStore.completeOrder(customer, paymentMethod);
-
-    if (order) {
-      this.selectedCustomer.set(null);
-      this.snackBar.open('Sipariş tamamlandı!', 'Tamam', { duration: 3000 });
-    } else {
-      this.snackBar.open('Sipariş tamamlanırken hata oluştu', 'Tamam', {
-        duration: 3000,
-      });
-    }
-  }
-
-  cancelOrder() {
-    this.orderStore.clearCart();
-    this.selectedCustomer.set(null);
-    this.snackBar.open('Sipariş iptal edildi', 'Tamam', { duration: 2000 });
-  }
 
   viewOrderDetails(order: OrderModel): void {
     console.log('Order Details:', order);

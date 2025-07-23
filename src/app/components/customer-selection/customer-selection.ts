@@ -17,8 +17,12 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatListModule } from '@angular/material/list';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDividerModule } from '@angular/material/divider';
-import { CustomerModel } from '@shared/models/customer.model';
-import { PriceType, getPriceTypeLabel, getPriceTypeOptions } from '@shared/enums/price-type.enum';
+import { CustomerModel, initialCustomer } from '@shared/models/customer.model';
+import {
+  PriceType,
+  getPriceTypeLabel,
+  getPriceTypeOptions,
+} from '@shared/enums/price-type.enum';
 
 @Component({
   selector: 'app-customer-selection',
@@ -41,20 +45,11 @@ import { PriceType, getPriceTypeLabel, getPriceTypeOptions } from '@shared/enums
     MatDividerModule,
   ],
 })
-export default class CustomerSelection implements OnInit {
+export default class CustomerSelection {
   selectedTabIndex = signal(0);
   searchQuery = signal('');
-  
-  customerData: Partial<CustomerModel> = {
-    name: '',
-    phone: '',
-    email: '',
-    isEInvoice: true,
-    priceType: PriceType.ECZ,
-  };
 
-  savedCustomers: CustomerModel[] = [];
-  filteredCustomers = signal<CustomerModel[]>([]);
+  customerData: CustomerModel = initialCustomer;
 
   PriceType = PriceType;
   isCorporate = signal(false);
@@ -64,44 +59,6 @@ export default class CustomerSelection implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
-  ngOnInit() {
-    console.log('CustomerSelection ngOnInit çalıştı');
-    this.loadSavedCustomers();
-  }
-
-  loadSavedCustomers() {
-    try {
-      const saved = localStorage.getItem('customers');
-      this.savedCustomers = saved ? JSON.parse(saved) : [];
-      console.log('Kayıtlı müşteriler:', this.savedCustomers.length);
-      this.filteredCustomers.set(this.savedCustomers);
-    } catch (error) {
-      console.error('Müşterileri yüklerken hata:', error);
-      this.savedCustomers = [];
-      this.filteredCustomers.set([]);
-    }
-  }
-
-  filterCustomers() {
-    try {
-      const query = this.searchQuery().toLowerCase();
-      if (!query) {
-        this.filteredCustomers.set(this.savedCustomers);
-        return;
-      }
-
-      const filtered = this.savedCustomers.filter(customer =>
-        customer.name.toLowerCase().includes(query) ||
-        customer.phone.includes(query) ||
-        customer.email.toLowerCase().includes(query)
-      );
-      this.filteredCustomers.set(filtered);
-    } catch (error) {
-      console.error('Filtreleme hatası:', error);
-      this.filteredCustomers.set([]);
-    }
-  }
-
   selectExistingCustomer(customer: CustomerModel) {
     this.dialogRef.close(customer);
   }
@@ -110,20 +67,20 @@ export default class CustomerSelection implements OnInit {
     if (this.isCorporate()) {
       this.customerData.tcNo = undefined;
     } else {
-      this.customerData.taxOffice = undefined;
-      this.customerData.taxNo = undefined;
+      this.customerData.taxNumber = undefined;
     }
   }
 
   isFormValid(): boolean {
-    const { name, phone, email, tcNo, taxOffice, taxNo, priceType } = this.customerData;
+    const { firstName, phone, email, tcNo, taxNumber, type } =
+      this.customerData;
 
-    if (!name || !phone || !email || priceType === undefined) {
+    if (!firstName || !phone || !email || type === undefined) {
       return false;
     }
 
     if (this.isCorporate()) {
-      return !!(taxOffice && taxNo && taxNo.length === 10);
+      return !!(taxNumber && taxNumber.length === 10);
     } else {
       return !!(tcNo && tcNo.length === 11);
     }
@@ -134,30 +91,12 @@ export default class CustomerSelection implements OnInit {
   }
 
   saveNewCustomer() {
-    if (this.isFormValid()) {
-      const customer: CustomerModel = {
-        id: crypto.randomUUID(),
-        name: this.customerData.name!,
-        phone: this.customerData.phone!,
-        email: this.customerData.email!,
-        isEInvoice: this.customerData.isEInvoice!,
-        priceType: this.customerData.priceType!,
-        ...(this.isCorporate()
-          ? {
-              taxOffice: this.customerData.taxOffice!,
-              taxNo: this.customerData.taxNo!,
-            }
-          : {
-              tcNo: this.customerData.tcNo!,
-            }),
-      };
-
-      // LocalStorage'a kaydet
-      this.savedCustomers.push(customer);
-      localStorage.setItem('customers', JSON.stringify(this.savedCustomers));
-
-      this.dialogRef.close(customer);
-    }
+    // if (this.isFormValid()) {
+    //   // LocalStorage'a kaydet
+    //   this.savedCustomers.push(this.customerData);
+    //   localStorage.setItem('customers', JSON.stringify(this.savedCustomers));
+    //   this.dialogRef.close(customer);
+    // }
   }
 
   onCancel() {

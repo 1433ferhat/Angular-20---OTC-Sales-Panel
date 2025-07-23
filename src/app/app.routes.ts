@@ -18,19 +18,18 @@ export const routes: Routes = [
       //   title: 'Dashboard - OTC Satış',
       // },
       {
-        path: 'satis',
-        loadComponent: () => import('./pages/home/home'),
+        path: '',
+        loadComponent: () => import('./pages/orders/create/order-create'),
         title: 'Satış Yap - OTC Satış',
       },
       {
-        path: '',
-        loadComponent: () => import('./pages/home/home'),
-        title: 'Satış Yap - OTC Satış',
+        path: 'siparisler',
+        loadChildren: () => import('./pages/orders/orders.routes'),
       },
       {
         path: 'urunler',
         title: 'Fiyat Sorgula - OTC Satış',
-        loadChildren:()=>import('./pages/customer/customer.routes')
+        loadChildren: () => import('./pages/products/products.routes'),
       },
       {
         path: 'musteriler',

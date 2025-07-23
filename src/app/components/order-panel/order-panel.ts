@@ -1,3 +1,4 @@
+// src/app/components/order-panel/order-panel.ts
 import {
   Component,
   Input,
@@ -59,6 +60,65 @@ export default class OrderPanel {
 
   PaymentMethod = PaymentMethod;
 
+  updateQuantity(id: string, change: number) {
+    const cartItems = this.cartItems();
+    const item = cartItems.find((i) => i.id === id);
+    if (item) {
+      const newQuantity = Math.max(1, item.quantity + change);
+      this.orderStore.updateCartItemQuantity(item.id, newQuantity);
+    }
+  }
+
+  removeFromCart(id: string) {
+    this.orderStore.removeFromCart(id);
+    this.snackBar.open('Ürün sepetten çıkarıldı', 'Tamam', { duration: 2000 });
+  }
+
+  selectCustomer() {
+    const dialogRef = this.dialog.open(CustomerSelection, {
+      width: '600px',
+      data: {},
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.selectedCustomer.set(result);
+        this.productStore.updateProductPricesForCustomer(result.priceType);
+      }
+    });
+  }
+
+  async completeOrder(paymentMethod: PaymentMethod) {
+    const customer = this.selectedCustomer();
+    if (!customer) {
+      this.snackBar.open('Lütfen müşteri seçin', 'Tamam', { duration: 3000 });
+      return;
+    }
+
+    const cartItems = this.cartItems();
+    if (cartItems.length === 0) {
+      this.snackBar.open('Sepet boş', 'Tamam', { duration: 3000 });
+      return;
+    }
+
+    const order = await this.orderStore.completeOrder(customer, paymentMethod);
+
+    if (order) {
+      this.selectedCustomer.set(null);
+      this.snackBar.open('Sipariş tamamlandı!', 'Tamam', { duration: 3000 });
+    } else {
+      this.snackBar.open('Sipariş tamamlanırken hata oluştu', 'Tamam', {
+        duration: 3000,
+      });
+    }
+  }
+
+  cancelOrder() {
+    this.orderStore.clearCart();
+    this.selectedCustomer.set(null);
+    this.snackBar.open('Sipariş iptal edildi', 'Tamam', { duration: 2000 });
+  }
+
   changeQuantity(itemId: string, change: number) {
     const item = this.cart.find((i) => i.id === itemId);
     if (item) {
@@ -81,18 +141,6 @@ export default class OrderPanel {
     this.itemRemoved.emit(itemId);
   }
 
-  completeOrder(paymentMethod: PaymentMethod) {
-    if (!this.selectedCustomer) return;
-    this.orderCompleted.emit(paymentMethod);
-  }
-
-  cancelOrder() {
-    this.orderCancelled.emit();
-  }
-
-  selectCustomer() {
-    this.customerSelectionRequested.emit();
-  }
 
   getItemName(item: OrderItemModel): string {
     return item.product?.name || 'Bilinmeyen Ürün';

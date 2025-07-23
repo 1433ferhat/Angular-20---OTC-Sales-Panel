@@ -1,91 +1,31 @@
 <div class="customers-page">
-  <div class="page-header">
-    <h1>
-      <mat-icon>people</mat-icon>
-      Müşteri Yönetimi
-    </h1>
-    <button mat-raised-button color="primary" (click)="addCustomer()">
-      <mat-icon>person_add</mat-icon>
-      Yeni Müşteri
-    </button>
-  </div>
-
-  <!-- Arama -->
-  <mat-card class="search-card">
-    <mat-form-field appearance="outline">
-      <mat-label>Müşteri Ara</mat-label>
-      <input matInput 
-             [(ngModel)]="searchQuery" 
-             placeholder="Ad, telefon veya e-posta ile ara">
-      <mat-icon matPrefix>search</mat-icon>
-    </mat-form-field>
-  </mat-card>
 
   <!-- Müşteri Listesi -->
   <mat-card class="table-card">
-    <mat-card-header>
-      <mat-card-title>
-        Müşteriler ({{ filteredCustomers.length }})
-      </mat-card-title>
-    </mat-card-header>
+    <flexi-grid [data]="customers()" [loading]="loading()" [showCaption]="true" captionTitle="Muşteri Listesi"
+      [showExportExcelBtn]="true" language="tr" (onRefresh)="refresh()">
+      <ng-template flexiGridCaptionCommandTemplate>
+        <button mat-raised-button color="primary" routerLink="/musteriler/ekle">
+          <mat-icon>person_add</mat-icon>
+          Yeni Müşteri
+        </button>
+      </ng-template>
+      <flexi-grid-column width="100px" field="firstName" title="Ad" />
+      <flexi-grid-column width="100px" field="lastName" title="Soyad" />
+      <flexi-grid-column width="100px" field="phone" title="Telefon" />
+      <flexi-grid-column field="email" title="Mail" />
+      <flexi-grid-column field="companyName" title="Şirket" />
+      <flexi-grid-column field="taxNumber" title="Vergi No" />
+      <flexi-grid-column width="100px" field="tcNo" title="Tc No" />
+      <flexi-grid-column width="50px" field="type" title="Cari Tipi" />
 
-    <mat-card-content>
-      @if (filteredCustomers.length === 0) {
-        <div class="no-data">
-          <mat-icon>people_outline</mat-icon>
-          <p>Müşteri bulunamadı</p>
-        </div>
-      } @else {
-        <table mat-table [dataSource]="filteredCustomers" class="customers-table">
-          <!-- Ad Soyad -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Ad Soyad</th>
-            <td mat-cell *matCellDef="let customer">{{ customer.name }}</td>
-          </ng-container>
+      <ng-template flexiGridColumnCommandTemplate let-item>
+        <flexi-button [routerLink]="['/','musteriler','ekle', item.id]" btnIcon="edit" btnColor="info" btnSize="small"
+          title="Güncelle" flexiTooltip />
+        <flexi-button (click)="deleteCustomer(item)" btnIcon="delete" btnColor="danger" btnSize="small" title="Sil"
+          flexiTooltip />
+      </ng-template>
 
-          <!-- Telefon -->
-          <ng-container matColumnDef="phone">
-            <th mat-header-cell *matHeaderCellDef>Telefon</th>
-            <td mat-cell *matCellDef="let customer">{{ customer.phone }}</td>
-          </ng-container>
-
-          <!-- E-posta -->
-          <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef>E-posta</th>
-            <td mat-cell *matCellDef="let customer">{{ customer.email }}</td>
-          </ng-container>
-
-          <!-- Fiyat Tipi -->
-          <ng-container matColumnDef="priceType">
-            <th mat-header-cell *matHeaderCellDef>Fiyat Tipi</th>
-            <td mat-cell *matCellDef="let customer">
-              <span class="price-type-badge">{{ getPriceTypeLabel(customer.priceType) }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Müşteri Tipi -->
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef>Tip</th>
-            <td mat-cell *matCellDef="let customer">{{ getCustomerType(customer) }}</td>
-          </ng-container>
-
-          <!-- İşlemler -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>İşlemler</th>
-            <td mat-cell *matCellDef="let customer">
-              <button mat-icon-button (click)="editCustomer(customer)" matTooltip="Düzenle">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="deleteCustomer(customer)" matTooltip="Sil">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-      }
-    </mat-card-content>
+    </flexi-grid>
   </mat-card>
 </div>

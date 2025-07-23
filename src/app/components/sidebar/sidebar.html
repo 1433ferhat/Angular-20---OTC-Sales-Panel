@@ -1,46 +1,37 @@
-    <div class="sidebar-content">
-      <nav class="navigation-menu">
-        
-        <!-- Single level items -->
-        @for (item of singleItems; track item.route) {
-          <div class="menu-item">
-            <button mat-button 
-                    class="menu-button" 
-                    [class.active]="isActive(item.route)"
-                    (click)="navigate(item.route)">
-              <mat-icon>{{ item.icon }}</mat-icon>
-              <span>{{ item.name }}</span>
-            </button>
-          </div>
+<div class="sidebar-content">
+  <nav class="navigation-menu">
+    @for (menu of menus; track menu.name) {
+    @if (menu?.children) {
+    <div class="menu-category">
+      <button mat-button class="category-button" [class.expanded]="isExpanded(menu.name)"
+        (click)="toggleMenu(menu.name)">
+        <mat-icon>{{ menu.icon }}</mat-icon>
+        <span>{{ menu.name }}</span>
+        <mat-icon class="expand-icon">
+          {{ isExpanded(menu.name) ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </button>
+
+      <div class="category-items" [class.expanded]="isExpanded(menu.name)">
+        @for (child of menu.children; track child.route) {
+        <a mat-button class="child-button" [routerLink]="child.route" routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+          <mat-icon>{{ child.icon }}</mat-icon>
+          <span>{{ child.name }}</span>
+        </a>
         }
-        
-        <!-- Multi level items -->
-        @for (category of categories; track category.name) {
-          <div class="menu-category">
-            <button mat-button 
-                    class="category-button" 
-                    [class.expanded]="isExpanded(category.name)"
-                    (click)="toggleCategory(category.name)">
-              <mat-icon>{{ category.icon }}</mat-icon>
-              <span>{{ category.name }}</span>
-              <mat-icon class="expand-icon">
-                {{ isExpanded(category.name) ? 'expand_less' : 'expand_more' }}
-              </mat-icon>
-            </button>
-            
-            <div class="category-items" 
-                 [class.expanded]="isExpanded(category.name)">
-              @for (child of category.children; track child.route) {
-                <button mat-button 
-                        class="child-button" 
-                        [class.active]="isActive(child.route)"
-                        (click)="navigate(child.route)">
-                  <mat-icon>{{ child.icon }}</mat-icon>
-                  <span>{{ child.name }}</span>
-                </button>
-              }
-            </div>
-          </div>
-        }
-      </nav>
+      </div>
     </div>
+    }
+    @else {
+    <div class="menu-item">
+      <a mat-button class="menu-button" [routerLink]="menu.route" routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon>{{ menu.icon }}</mat-icon>
+        <span>{{ menu.name }}</span>
+      </a>
+    </div>
+    }
+    }
+  </nav>
+</div>

@@ -1,12 +1,16 @@
 import { Route } from '@angular/router';
 
-export  const  routes: Route[] = [
+export const routes: Route[] = [
   {
     path: '',
     loadComponent: () => import('./customer'),
   },
   {
-    path: 'musteri-ekle',
+    path: 'ekle',
+    loadComponent: () => import('./create/customer-create'),
+  },
+  {
+    path: 'ekle/:id',
     loadComponent: () => import('./create/customer-create'),
   },
 ];

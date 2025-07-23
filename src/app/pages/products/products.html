@@ -1,0 +1,6 @@
+<div class="total-row-count">{{ gridApi.getDisplayedRowCount()}} satır görüntüleniyor</div>
+
+<ag-grid-angular class="ag-theme-alpine" [rowData]="products()" [columnDefs]="columnDefs"
+  [defaultColDef]="defaultColDef" [localeText]="localeText" style="width: 100%; height: 600px;"
+  (gridReady)="onGridReady($event)" (filterChanged)="updateRowCount()">
+</ag-grid-angular>

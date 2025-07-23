@@ -1,31 +1,48 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, resource } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { CustomerModel } from '@shared/models/customer.model';
+import { CustomerModel } from '../models/customer.model';
+import { first, firstValueFrom, lastValueFrom, Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class CustomerService {
+export class CustomerStore {
   private http = inject(HttpClient);
 
-  getAllCustomers(): Observable<CustomerModel[]> {
-    return this.http.get<CustomerModel[]>('api/customers/getall');
+  // Resource for customers (Angular 20 approach)
+  customersResource = resource({
+    loader: () =>
+      lastValueFrom(this.http.get<CustomerModel[]>('api/customers/getall')),
+  });
+
+  // Computed signals
+  customers = computed(() => this.customersResource.value() || []);
+  loading = computed(() => this.customersResource.isLoading());
+  error = computed(() => this.customersResource.error());
+
+  // CRUD operations
+  getCustomerById(id: string): Promise<CustomerModel> {
+    return lastValueFrom(this.http.get<CustomerModel>(`api/customers/${id}`));
   }
 
-  getCustomerById(id: string): Observable<CustomerModel> {
-    return this.http.get<CustomerModel>(`api/customers/${id}`);
+  async createCustomer(customer: CustomerModel): Promise<CustomerModel> {
+    const result = await firstValueFrom(
+      this.http.post<CustomerModel>('api/customers', customer)
+    );
+    this.customersResource.reload(); // Reload after create
+    return result;
   }
 
-  createCustomer(customer: Omit<CustomerModel, 'id' | 'createdDate'>): Observable<CustomerModel> {
-    return this.http.post<CustomerModel>('api/customers', customer);
+  async updateCustomer(customer: CustomerModel): Promise<CustomerModel> {
+    const result = await firstValueFrom(
+      this.http.put<CustomerModel>(`api/customers`, customer)
+    );
+    this.customersResource.reload(); // Reload after update
+    return result;
   }
 
-  updateCustomer(id: string, customer: Partial<CustomerModel>): Observable<CustomerModel> {
-    return this.http.put<CustomerModel>(`api/customers/${id}`, customer);
-  }
-
-  deleteCustomer(id: string): Observable<void> {
-    return this.http.delete<void>(`api/customers/${id}`);
+  async deleteCustomer(id: string): Promise<void> {
+    await lastValueFrom(this.http.delete<void>(`api/customers/${id}`));
+    this.customersResource.reload(); // Reload after delete
   }
 }

@@ -1,7 +1,15 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  linkedSignal,
+  resource,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,13 +19,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CustomerModel } from '@shared/models/customer.model';
-import { CustomerService } from '@shared/stores/customer.store';
+import { CustomerModel, initialCustomer } from '@shared/models/customer.model';
+import { CustomerStore } from '@shared/stores/customer.store';
 import {
-  PriceType,
   getPriceTypeLabel,
   getPriceTypeOptions,
 } from '@shared/enums/price-type.enum';
+import { HttpClient } from '@angular/common/http';
+import { lastValueFrom } from 'rxjs';
+import { CustomerCreateForm } from './customer-create.form';
 
 @Component({
   selector: 'app-customer-create',
@@ -35,143 +45,86 @@ import {
     MatSelectModule,
     MatCheckboxModule,
     MatRadioModule,
+    RouterModule,
+    ReactiveFormsModule,
   ],
 })
-export default class CustomerCreate implements OnInit {
-  private customerService = inject(CustomerService);
+export default class CustomerCreate {
+  readonly id = signal<string | undefined>(undefined);
+  readonly #customerCreateForm = inject(CustomerCreateForm);
+
+  form: FormGroup = this.#customerCreateForm.createForm(initialCustomer);
+  readonly #customerStore = inject(CustomerStore);
   private router = inject(Router);
-  private route = inject(ActivatedRoute);
   private snackBar = inject(MatSnackBar);
+  readonly #activate = inject(ActivatedRoute);
+  readonly #http = inject(HttpClient);
+  readonly result = resource({
+    params: () => this.id(),
+    loader: async () => {
+      const form = await lastValueFrom(
+        this.#http.get<CustomerModel>(`api/customers/${this.id()}`)
+      );
+      this.form.patchValue(form);
+      return form;
+    },
+  });
 
-  isEditing = false;
-  customerId: string | null = null;
-  isLoading = false;
+  readonly loading = computed(() => this.result?.isLoading() ?? true);
 
-  customerForm: Partial<CustomerModel> = {
-    name: '',
-    phone: '',
-    email: '',
-    isEInvoice: false,
-    priceType: PriceType.ECZ,
-    isActive: true,
-  };
-
-  ngOnInit() {
-    this.customerId = this.route.snapshot.paramMap.get('id');
-    if (this.customerId) {
-      this.isEditing = true;
-      this.loadCustomer();
-    }
-  }
-
-  loadCustomer() {
-    if (!this.customerId) return;
-
-    this.isLoading = true;
-    this.customerService.getCustomerById(this.customerId).subscribe({
-      next: (customer) => {
-        this.customerForm = { ...customer };
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Müşteri yüklenirken hata:', error);
-        this.snackBar.open('Müşteri yüklenirken hata oluştu', 'Tamam', {
-          duration: 3000,
-        });
-        this.router.navigate(['/customer']);
-        this.isLoading = false;
-      },
+  constructor() {
+    this.#activate.params.subscribe((res) => {
+      if (res['id']) this.id.set(res['id']);
     });
   }
 
   save() {
-    if (!this.isFormValid()) {
-      this.snackBar.open('Lütfen tüm alanları doldurun', 'Tamam', {
+    const formValue = this.form.value;
+    if (
+      !this.form.valid ||
+      !this.#customerCreateForm.isFormValidCustom(formValue)
+    ) {
+      this.snackBar.open('Lütfen gerekli alanları doğru girin.', 'Tamam', {
         duration: 3000,
       });
       return;
     }
 
-    this.isLoading = true;
+    const payload = this.form.value;
 
-    if (this.isEditing && this.customerId) {
-      // Update
-      this.customerService
-        .updateCustomer(this.customerId, this.customerForm)
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Müşteri güncellendi', 'Tamam', {
-              duration: 2000,
-            });
-            this.router.navigate(['/customer']);
-          },
-          error: (error) => {
-            console.error('Müşteri güncellenirken hata:', error);
-            this.snackBar.open('Müşteri güncellenirken hata oluştu', 'Tamam', {
-              duration: 3000,
-            });
-            this.isLoading = false;
-          },
-        });
+    if (this.id()) {
+      payload.id = this.id();
+      this.#customerStore.updateCustomer(payload).then(() => {
+        this.snackBar.open('Müşteri güncellendi', 'Tamam', { duration: 2000 });
+        this.router.navigate(['/customer']);
+      });
     } else {
-      // Create
-      const customerData = { ...this.customerForm } as Omit<
-        CustomerModel,
-        'id' | 'createdDate'
-      >;
-
-      this.customerService.createCustomer(customerData).subscribe({
-        next: () => {
-          this.snackBar.open('Müşteri eklendi', 'Tamam', { duration: 2000 });
-          this.router.navigate(['/customer']);
-        },
-        error: (error) => {
-          console.error('Müşteri eklenirken hata:', error);
-          this.snackBar.open('Müşteri eklenirken hata oluştu', 'Tamam', {
-            duration: 3000,
-          });
-          this.isLoading = false;
-        },
+      this.#customerStore.createCustomer(payload).then(() => {
+        this.snackBar.open('Müşteri eklendi', 'Tamam', { duration: 2000 });
+        this.router.navigate(['/customer']);
       });
     }
   }
 
-  cancel() {
-    this.router.navigate(['/customer']);
+  onIsEInvoiceChange(isEInvoice: boolean) {
+    const value: CustomerModel = this.result.value() ?? initialCustomer;
+
+    this.form.patchValue({
+      isEInvoice,
+      tcNo: isEInvoice ? null : value.tcNo,
+      taxNumber: isEInvoice ? value.taxNumber : null,
+    });
+  }
+  onTypeChange(isCorporate: boolean) {
+    const value: CustomerModel = this.result.value() ?? initialCustomer;
+    this.form.patchValue({
+      isCorporate,
+      tcNo: isCorporate ? null : value.tcNo,
+      companyName: isCorporate ? value.companyName : null,
+      taxNumber: isCorporate ? value.taxNumber : null,
+    });
   }
 
-  isFormValid(): boolean {
-    const { name, phone, email, priceType } = this.customerForm;
-    if (!name || !phone || !email || priceType === undefined) {
-      return false;
-    }
-
-    const isCorporate = this.isCorporate();
-
-    if (isCorporate) {
-      return !!(
-        this.customerForm.taxOffice &&
-        this.customerForm.taxNo &&
-        this.customerForm.taxNo.length === 10
-      );
-    } else {
-      return !!(this.customerForm.tcNo && this.customerForm.tcNo.length === 11);
-    }
-  }
-
-  isCorporate(): boolean {
-    return !!(this.customerForm.taxOffice || this.customerForm.taxNo);
-  }
-
-  onCustomerTypeChange(isCorporate: boolean) {
-    if (isCorporate) {
-      this.customerForm.tcNo = undefined;
-    } else {
-      this.customerForm.taxOffice = undefined;
-      this.customerForm.taxNo = undefined;
-    }
-  }
-
-  getPriceTypeOptions = getPriceTypeOptions;
+  priceTypeOptions = getPriceTypeOptions(); // sadece bir kere çağrılır
   getPriceTypeLabel = getPriceTypeLabel;
 }

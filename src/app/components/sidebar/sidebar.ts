@@ -35,28 +35,9 @@ interface MenuItem {
 export default class Sidebar {
   private router = inject(Router);
 
-  currentRoute = signal<string>('');
-  expandedCategories = signal<Set<string>>(new Set(['Satış İşlemleri']));
+  expandedMenus = signal<Set<string>>(new Set(['Siparişler'])); // doğru ismi yaz
 
-  singleItems: MenuItem[] = [
-    // { name: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
-    { name: 'Satış Yap', icon: 'shopping_cart', route: 'satis' },
-    { name: 'Ürün Listesi', icon: 'inventory_2', route: 'urunler' },
-    { name: 'Müşteriler', icon: 'people', route: 'musteriler' },
-  ];
-
-  categories: MenuItem[] = [
-    // {
-    //   name: 'Satış İşlemleri',
-    //   icon: 'point_of_sale',
-    //   route: '',
-    //   children: [
-    //     { name: 'Satış Yap', icon: 'shopping_cart', route: 'sales' },
-    //     { name: 'Hızlı Satış', icon: 'flash_on', route: 'quick-sales' },
-    //     { name: 'Fiyat Sorgula', icon: 'search', route: 'price-check' },
-    //   ],
-    // },
-
+  menus: MenuItem[] = [
     {
       name: 'Siparişler',
       icon: 'receipt_long',
@@ -65,7 +46,7 @@ export default class Sidebar {
         {
           name: 'Sipariş Oluştur',
           icon: 'add_shopping_cart',
-          route: 'create-order',
+          route: 'siparisler/ekle',
         },
         { name: 'Sipariş Listesi', icon: 'list_alt', route: 'orders' },
         {
@@ -75,79 +56,19 @@ export default class Sidebar {
         },
       ],
     },
-    // {
-    //   name: 'Raporlar',
-    //   icon: 'analytics',
-    //   route: '',
-    //   children: [
-    //     { name: 'Satış Raporları', icon: 'trending_up', route: 'reports' },
-    //     { name: 'Stok Raporları', icon: 'storage', route: 'stock-reports' },
-    //     {
-    //       name: 'Finansal Raporlar',
-    //       icon: 'account_balance',
-    //       route: 'financial-reports',
-    //     },
-    //   ],
-    // },
-    {
-      name: 'Ayarlar',
-      icon: 'settings',
-      route: '',
-      children: [
-        { name: 'Genel Ayarlar', icon: 'tune', route: 'settings' },
-        { name: 'Kullanıcı Yönetimi', icon: 'people', route: 'users' },
-        { name: 'Yedekleme', icon: 'backup', route: 'backup' },
-      ],
-    },
+    { name: 'Ürün Listesi', icon: 'inventory_2', route: 'urunler' },
+    { name: 'Müşteriler', icon: 'people', route: 'musteriler' },
   ];
 
-  constructor() {
-    // Set initial route
-    this.updateCurrentRoute();
-  }
-
-  navigate(route: string) {
-    console.log(`Navigating to: ${route}`);
-    this.router
-      .navigate([route])
-      .then((success) => {
-        console.log('Navigation result:', success);
-        if (success) {
-          this.updateCurrentRoute();
-        }
-      })
-      .catch((error) => {
-        console.error('Navigation error:', error);
-      });
-  }
-
-  toggleCategory(categoryName: string) {
-    const expanded = this.expandedCategories();
+  toggleMenu(menuName: string) {
+    const expanded = this.expandedMenus();
     const newExpanded = new Set(expanded);
-
-    if (newExpanded.has(categoryName)) {
-      newExpanded.delete(categoryName);
-    } else {
-      newExpanded.add(categoryName);
-    }
-
-    this.expandedCategories.set(newExpanded);
-    console.log(`Toggled category: ${categoryName}`, newExpanded);
+    newExpanded.has(menuName)
+      ? newExpanded.delete(menuName)
+      : newExpanded.add(menuName);
+    this.expandedMenus.set(newExpanded);
   }
-
-  isExpanded(categoryName: string): boolean {
-    return this.expandedCategories().has(categoryName);
-  }
-
-  isActive(route: string): boolean {
-    const current = this.currentRoute();
-    return current === route;
-  }
-
-  private updateCurrentRoute() {
-    const url = this.router.url;
-    const route = url.split('/').filter((segment) => segment)[0] || 'dashboard';
-    this.currentRoute.set(route);
-    console.log(`Current route updated to: ${route}`);
+  isExpanded(menuName: string): boolean {
+    return this.expandedMenus().has(menuName);
   }
 }

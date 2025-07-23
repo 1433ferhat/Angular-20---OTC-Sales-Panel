@@ -3,10 +3,10 @@ import { ProductModel } from './product.model';
 export interface OrderItemModel {
   id: string;
   productId: string;
-  orderId: string;
+  orderId?: string;
   quantity: number;
   unitPrice: number;
   totalPrice: number;
-  expiration: Date | undefined;
+  expiration?: Date;
   product: ProductModel | undefined;
 }

@@ -37,6 +37,7 @@ import { ProductStore } from '@shared/stores/product.store';
     MatIconModule,
   ],
 })
+
 export default class BarcodeScanner {
   @ViewChild('barcodeInput') barcodeInput!: ElementRef<HTMLInputElement>;
   @Output() productFound = new EventEmitter<ProductModel>();
@@ -45,10 +46,6 @@ export default class BarcodeScanner {
 
   barcode = signal<string>('');
   searchResults = signal<ProductModel[]>([]);
-
-  ngAfterViewInit() {
-    setTimeout(() => this.barcodeInput?.nativeElement.focus(), 100);
-  }
 
   searchProduct() {
     const barcodeValue = this.barcode().trim();

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -10,15 +10,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { CustomerModel } from '@shared/models/customer.model';
-import { CustomerService } from '@shared/stores/customer.store';
+import { CustomerStore } from '@shared/stores/customer.store';
 import { getPriceTypeLabel } from '@shared/enums/price-type.enum';
-
+import { FlexiGridModule } from 'flexi-grid';
 @Component({
   selector: 'app-customers',
   templateUrl: './customer.html',
   styleUrl: './customer.scss',
   standalone: true,
   imports: [
+    FlexiGridModule,
     CommonModule,
     FormsModule,
     MatTableModule,
@@ -31,77 +32,31 @@ import { getPriceTypeLabel } from '@shared/enums/price-type.enum';
     RouterModule,
   ],
 })
-export default class Customers implements OnInit {
-  private customerService = inject(CustomerService);
+export default class Customers {
+  private customerStore = inject(CustomerStore);
   private snackBar = inject(MatSnackBar);
-  private router = inject(Router);
 
-  customers: CustomerModel[] = [];
-  searchQuery = '';
-
-  displayedColumns = ['name', 'phone', 'email', 'priceType', 'type', 'actions'];
-
-  ngOnInit() {
-    this.loadCustomers();
+  // Computed properties using store signals
+  customers = computed(() => this.customerStore.customers());
+  loading = computed(() => this.customerStore.loading());
+  refresh() {
+    this.customerStore.customersResource.reload();
   }
-
-  loadCustomers() {
-    this.customerService.getAllCustomers().subscribe({
-      next: (customers) => {
-        this.customers = customers;
-      },
-      error: (error) => {
-        console.error('Müşteriler yüklenirken hata:', error);
-        this.snackBar.open('Müşteriler yüklenirken hata oluştu', 'Tamam', {
-          duration: 3000,
-        });
-      },
-    });
-  }
-
-  addCustomer() {
-    this.router.navigate(['/customer/create']);
-  }
-
-  editCustomer(customer: CustomerModel) {
-    this.router.navigate(['/customer/create', customer.id]);
-  }
-
-  getPriceTypeLabel = getPriceTypeLabel;
-
-  getCustomerType(customer: CustomerModel): string {
-    return customer.tcNo ? 'Bireysel' : 'Kurumsal';
-  }
-
-  deleteCustomer(customer: CustomerModel) {
+  async deleteCustomer(customer: CustomerModel) {
     if (
       confirm(
-        `${customer.name} müşterisini silmek istediğinizden emin misiniz?`
+        `${customer.firstName} müşterisini silmek istediğinizden emin misiniz?`
       )
     ) {
-      this.customerService.deleteCustomer(customer.id!).subscribe({
-        next: () => {
-          this.customers = this.customers.filter((c) => c.id !== customer.id);
-          this.snackBar.open('Müşteri silindi', 'Tamam', { duration: 2000 });
-        },
-        error: (error) => {
-          console.error('Müşteri silinirken hata:', error);
-          this.snackBar.open('Müşteri silinirken hata oluştu', 'Tamam', {
-            duration: 3000,
-          });
-        },
-      });
+      try {
+        await this.customerStore.deleteCustomer(customer.id!);
+        this.snackBar.open('Müşteri silindi', 'Tamam', { duration: 2000 });
+      } catch (error) {
+        console.error('Müşteri silinirken hata:', error);
+        this.snackBar.open('Müşteri silinirken hata oluştu', 'Tamam', {
+          duration: 3000,
+        });
+      }
     }
-  }
-
-  get filteredCustomers() {
-    if (!this.searchQuery) return this.customers;
-
-    return this.customers.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        customer.phone.includes(this.searchQuery) ||
-        customer.email.toLowerCase().includes(this.searchQuery.toLowerCase())
-    );
   }
 }

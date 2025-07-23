@@ -9,6 +9,7 @@ import { catchError } from 'rxjs/operators';
 import { OrderStatus } from '../enums/order-status.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
 import { PaginateModel } from '@shared/models/paginate.model';
+import { PriceType } from '@shared/enums/price-type.enum';
 
 @Injectable({
   providedIn: 'root',
@@ -59,34 +60,34 @@ export class OrderStore {
 
     if (existingItem) {
       this.updateCartItemQuantity(
-        existingItem.id,
+        existingItem.productId,
         existingItem.quantity + quantity
       );
     } else {
+      const unitPrice = product.prices?.[PriceType.ETIC]?.price || 0;
+      if (unitPrice <= 0) return;
       const newItem: OrderItemModel = {
-        id: crypto.randomUUID(),
+        id: '1',
         orderId: '',
-        expiration: undefined,
         productId: product.id,
         quantity: quantity,
-        unitPrice: product.prices?.[0]?.price || 0,
-        totalPrice: (product.prices?.[0]?.price || 0) * quantity,
+        unitPrice: unitPrice,
+        totalPrice: unitPrice * quantity,
         product: product,
       };
-
       this._cartItems.set([...items, newItem]);
     }
   }
 
-  removeFromCart(itemId: string) {
+  removeFromCart(id: string) {
     const items = this._cartItems();
-    this._cartItems.set(items.filter((item) => item.id !== itemId));
+    this._cartItems.set(items.filter((item) => item.id !== id));
   }
 
-  updateCartItemQuantity(itemId: string, newQuantity: number) {
+  updateCartItemQuantity(id: string, newQuantity: number) {
     const items = this._cartItems();
     const updatedItems = items.map((item) => {
-      if (item.id === itemId) {
+      if (item.id === id) {
         return {
           ...item,
           quantity: newQuantity,

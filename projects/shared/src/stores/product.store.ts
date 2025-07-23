@@ -52,6 +52,10 @@ export class ProductStore {
     () => this.productsResource.error() || this.categoriesResource.error()
   );
 
+  refresh() {
+    this.productsResource.reload();
+  }
+
   // Filtered products
   filteredProducts = computed(() => {
     const products = this.products();
