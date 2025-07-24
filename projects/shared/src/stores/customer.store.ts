@@ -1,14 +1,16 @@
 import { Injectable, signal, computed, inject, resource } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CustomerModel } from '../models/customer.model';
+import { CustomerModel, initialCustomer } from '../models/customer.model';
 import { first, firstValueFrom, lastValueFrom, Observable } from 'rxjs';
+import { OrderItemStore } from './order-item.store';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CustomerStore {
   private http = inject(HttpClient);
-  readonly customer = signal<CustomerModel | undefined>(undefined);
+  private readonly getOrderItemStore = () => inject(OrderItemStore);
+  readonly customer = signal<CustomerModel>({ ...initialCustomer });
 
   // Resource for customers (Angular 20 approach)
   customersResource = resource({
@@ -22,7 +24,10 @@ export class CustomerStore {
   error = computed(() => this.customersResource.error());
 
   selectCustomer(id: string) {
-    this.customer.set(this.customers().find((c) => c.id == id));
+    this.customer.set(
+      this.customers().find((c) => c.id === id) ?? { ...initialCustomer }
+    );
+    this.getOrderItemStore().updatePrice();
   }
   async createCustomer(customer: CustomerModel): Promise<CustomerModel> {
     const result = await firstValueFrom(

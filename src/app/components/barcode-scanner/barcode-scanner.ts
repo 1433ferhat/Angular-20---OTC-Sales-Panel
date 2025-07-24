@@ -19,6 +19,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { ProductModel } from '@shared/models/product.model';
 import { ProductStore } from '@shared/stores/product.store';
+import { OrderItemStore } from '@shared/stores/order-item.store';
 
 @Component({
   selector: 'app-barcode-scanner',
@@ -37,12 +38,11 @@ import { ProductStore } from '@shared/stores/product.store';
     MatIconModule,
   ],
 })
-
 export default class BarcodeScanner {
   @ViewChild('barcodeInput') barcodeInput!: ElementRef<HTMLInputElement>;
-  @Output() productFound = new EventEmitter<ProductModel>();
 
-  private productStore = inject(ProductStore);
+  readonly #productStore = inject(ProductStore);
+  readonly #orderItemStore = inject(OrderItemStore);
 
   barcode = signal<string>('');
   searchResults = signal<ProductModel[]>([]);
@@ -51,21 +51,17 @@ export default class BarcodeScanner {
     const barcodeValue = this.barcode().trim();
     if (!barcodeValue) return;
 
-    const results = this.productStore.searchProducts(barcodeValue);
+    const results = this.#productStore.searchProducts(barcodeValue);
     this.searchResults.set(results);
 
-    if (results.length === 1) {
-      this.selectProduct(results[0]);
-    }
+    if (results.length === 1) this.selectProduct(results[0]);
   }
-
   selectProduct(product: ProductModel) {
-    this.productFound.emit(product);
     this.barcode.set('');
     this.searchResults.set([]);
     this.barcodeInput?.nativeElement.focus();
+    this.#orderItemStore.addItem(product);
   }
-
   onKeyDown(event: KeyboardEvent) {
     if (event.key === 'Enter') this.searchProduct();
   }

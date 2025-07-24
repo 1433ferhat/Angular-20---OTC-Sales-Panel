@@ -1,7 +1,7 @@
 import { PriceType } from '../enums/price-type.enum';
 
 export interface CustomerModel {
-  id?: string;
+  id: string;
   firstName: string;
   lastName: string;
   phone: string;
@@ -17,6 +17,7 @@ export interface CustomerModel {
   deletedDate?: Date;
 }
 export const initialCustomer: CustomerModel = {
+  id: '',
   firstName: '',
   lastName: '',
   phone: '',

@@ -34,8 +34,8 @@ export default class products {
   readonly products = computed(() => this.productStore.products());
   readonly loading = computed(() => this.productStore.loading());
 
-  gridApi!: GridApi;
-
+  gridApi: GridApi | undefined = undefined;
+  getDisplayedRowCount: number = 0;
   onGridReady(params: GridReadyEvent) {
     this.gridApi = params.api;
     this.updateRowCount();

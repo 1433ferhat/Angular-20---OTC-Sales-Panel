@@ -6,6 +6,7 @@ import {
   signal,
   computed,
   inject,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterOutlet } from '@angular/router';
@@ -19,8 +20,7 @@ import { CategoryStore } from '@shared/stores/category.store';
 import { CustomerStore } from '@shared/stores/customer.store';
 import { CustomerModel } from '@shared/models/customer.model';
 import { Common } from '../services/common';
-import { AuthService } from '../services/auth.service';
-import { OrderItemModel } from '@shared/models/order-item.model';
+import { OrderItemStore } from '@shared/stores/order-item.store';
 
 @Component({
   selector: 'app-layout',
@@ -40,15 +40,13 @@ import { OrderItemModel } from '@shared/models/order-item.model';
   ],
 })
 export default class Layout {
-  
-  
-  
   onSidebarToggle() {
     this.sidebarOpen.update((open) => !open);
   }
 
   private productStore = inject(ProductStore);
   private orderStore = inject(OrderStore);
+  private orderItemStore = inject(OrderItemStore);
   private customerStore = inject(CustomerStore);
   private categoryStore = inject(CategoryStore);
   private common = inject(Common);
@@ -60,9 +58,7 @@ export default class Layout {
 
   products = computed(() => this.productStore.products());
   categories = computed(() => this.categoryStore.categories());
-  cartItems = computed(() => this.orderStore.cartItems());
-  cartTotal = computed(() => this.orderStore.cartTotal());
-  cartItemCount = computed(() => this.orderStore.cartItemCount());
+
   orders = computed(() => this.orderStore.orders());
   currentOrder = computed(() => this.orderStore.currentOrder());
 
@@ -80,5 +76,4 @@ export default class Layout {
     this.orderStore.loadOrders();
     this.customerStore.customersResource.reload();
   }
-  
 }

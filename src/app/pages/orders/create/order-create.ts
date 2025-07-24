@@ -18,13 +18,5 @@ import { OrderStore } from '@shared/stores/order.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class OrderCreate {
-  private snackBar = inject(MatSnackBar);
-  readonly #orderStore = inject(OrderStore);
-
-  onProductFound(product: ProductModel) {
-    this.#orderStore.addToCart(product, 1);
-    this.snackBar.open(`${product.name} sepete eklendi`, 'Tamam', {
-      duration: 2000,
-    });
-  }
+ 
 }
