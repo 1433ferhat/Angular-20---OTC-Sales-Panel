@@ -80,4 +80,5 @@ export default class Layout {
     this.orderStore.loadOrders();
     this.customerStore.customersResource.reload();
   }
+  
 }

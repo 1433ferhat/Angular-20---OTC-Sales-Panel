@@ -10,16 +10,17 @@ import { OrderStatus } from '../enums/order-status.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
 import { PaginateModel } from '@shared/models/paginate.model';
 import { PriceType } from '@shared/enums/price-type.enum';
+import { OrderItemStore } from './order-item.store';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OrderStore {
   private http = inject(HttpClient);
+  readonly #orderItemStore = inject(OrderItemStore);
 
   // Signals
-  private _currentOrder = signal<OrderModel | null>(null);
-  private _cartItems = signal<OrderItemModel[]>([]);
+  private order = signal<OrderModel | null>(null);
 
   // Resource with error handling
   ordersResource = resource({
@@ -29,78 +30,13 @@ export class OrderStore {
 
   // Computed signals
   orders = computed(() => this.ordersResource.value()?.items || []);
-  currentOrder = computed(() => this._currentOrder());
-  cartItems = computed(() => this._cartItems());
+  currentOrder = computed(() => this.order());
   loading = computed(() => this.ordersResource.isLoading());
   error = computed(() => this.ordersResource.error());
-
-  // Cart computations
-  cartTotal = computed(() => {
-    return this._cartItems().reduce((total, item) => {
-      const price = item.product?.prices?.[0]?.price || 0;
-      return total + price * item.quantity;
-    }, 0);
-  });
-
-  cartItemCount = computed(() => {
-    return this._cartItems().reduce((count, item) => count + item.quantity, 0);
-  });
-
 
   // Actions
   loadOrders() {
     this.ordersResource.reload();
-  }
-
-  // Cart operations
-  addToCart(product: ProductModel, quantity: number = 1) {
-    const items = this._cartItems();
-    const existingItem = items.find((item) => item.productId === product.id);
-
-    if (existingItem) {
-      this.updateCartItemQuantity(
-        existingItem.productId,
-        existingItem.quantity + quantity
-      );
-    } else {
-      const unitPrice = product.prices?.[PriceType.ETIC]?.price || 0;
-      if (unitPrice <= 0) return;
-      const newItem: OrderItemModel = {
-        id: '1',
-        orderId: '',
-        productId: product.id,
-        quantity: quantity,
-        unitPrice: unitPrice,
-        totalPrice: unitPrice * quantity,
-        product: product,
-      };
-      this._cartItems.set([...items, newItem]);
-    }
-  }
-
-  removeFromCart(id: string) {
-    const items = this._cartItems();
-    this._cartItems.set(items.filter((item) => item.id !== id));
-  }
-
-  updateCartItemQuantity(id: string, newQuantity: number) {
-    const items = this._cartItems();
-    const updatedItems = items.map((item) => {
-      if (item.id === id) {
-        return {
-          ...item,
-          quantity: newQuantity,
-          totalPrice: item.unitPrice * newQuantity,
-        };
-      }
-      return item;
-    });
-
-    this._cartItems.set(updatedItems);
-  }
-
-  clearCart() {
-    this._cartItems.set([]);
   }
 
   // Order operations
@@ -110,7 +46,7 @@ export class OrderStore {
     try {
       const order: Partial<OrderModel> = {
         ...orderData,
-        items: this._cartItems(),
+        items: this.#orderItemStore.items(),
         totalPrice: this.cartTotal(),
         totalQuantity: this.cartItemCount(),
         orderDate: new Date(),
