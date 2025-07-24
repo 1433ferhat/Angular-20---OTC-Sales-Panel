@@ -98,15 +98,15 @@
       </button>
     </div>
   </div>
-  <!-- Ödeme Menüsü -->
-  <mat-menu #paymentMenu="matMenu">
-    <button mat-menu-item (click)="createOrder(PaymentMethod.Cash)">
-      <mat-icon>payments</mat-icon>
-      <span>Nakit</span>
-    </button>
-    <button mat-menu-item (click)="createOrder(PaymentMethod.CreditCard)">
-      <mat-icon>credit_card</mat-icon>
-      <span>Kredi Kartı</span>
-    </button>
-  </mat-menu>
 </div>
+<!-- Ödeme Menüsü -->
+<mat-menu #paymentMenu="matMenu">
+  <button mat-menu-item (click)="createOrder(PaymentMethod.Cash)">
+    <mat-icon>payments</mat-icon>
+    <span>Nakit</span>
+  </button>
+  <button mat-menu-item (click)="createOrder(PaymentMethod.CreditCard)">
+    <mat-icon>credit_card</mat-icon>
+    <span>Kredi Kartı</span>
+  </button>
+</mat-menu>
