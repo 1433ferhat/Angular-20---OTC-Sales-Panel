@@ -1,0 +1,27 @@
+
+    <div class="customer-dialog">
+      <h2 mat-dialog-title>
+        <mat-icon>people</mat-icon>
+        Müşteri Seçimi
+      </h2>
+      
+      <div mat-dialog-content class="dialog-content">
+        <ag-grid-angular
+          class="ag-theme-alpine"
+          [rowData]="customers()"
+          [columnDefs]="columnDefs"
+          [defaultColDef]="defaultColDef"
+          [gridOptions]="gridOptions"
+          (gridReady)="onGridReady($event)"
+          style="height: 500px; width: 100%;">
+        </ag-grid-angular>
+      </div>
+
+      <div mat-dialog-actions align="end">
+        <button mat-button (click)="close()">
+          <mat-icon>close</mat-icon>
+          İptal
+        </button>
+      </div>
+    </div>
+ 

@@ -19,6 +19,8 @@ import { CustomerModel } from '@shared/models/customer.model';
 import { getPriceTypeLabel } from '@shared/enums/price-type.enum';
 import { ProductBarcodeModel } from '@shared/models/product-barcode.model';
 import { MatButtonModule } from '@angular/material/button';
+import CustomerSelection from '../customer-selection/customer-selection';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-order-panel',
@@ -39,6 +41,8 @@ export default class OrderPanel {
   readonly #orderItemStore = inject(OrderItemStore);
   readonly #orderStore = inject(OrderStore);
   readonly #customerStore = inject(CustomerStore);
+  private dialog = inject(MatDialog);
+
   readonly items = computed<OrderItemModel[]>(() =>
     this.#orderItemStore.items()
   );
@@ -65,4 +69,19 @@ export default class OrderPanel {
   getPriceTypeText = getPriceTypeLabel;
 
   createOrder = this.#orderStore.createOrder;
+
+  openCustomer() {
+    const dialogRef = this.dialog.open(CustomerSelection, {
+      width: '800px',
+      maxHeight: '90vh',
+      disableClose: false,
+      data: { selectedCustomer: this.customer() },
+    });
+
+    dialogRef.afterClosed().subscribe((selectedCustomer) => {
+      if (selectedCustomer) {
+        console.log('Seçilen müşteri:', selectedCustomer);
+      }
+    });
+  }
 }
