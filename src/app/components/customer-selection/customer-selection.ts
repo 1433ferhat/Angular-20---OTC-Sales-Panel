@@ -1,3 +1,4 @@
+// src/app/components/customer-selection/customer-selection.ts
 import {
   ChangeDetectionStrategy,
   Component,
@@ -121,9 +122,17 @@ export default class CustomerSelection {
       sortable: false,
       filter: false,
       resizable: false,
-      width: 100,
+      width: 120,
+      pinned: 'right',
       cellRenderer: (params: any) => {
-        return `<button class="select-button" onclick="window.selectCustomer('${params.data.id}')">Seç</button>`;
+        return `
+          <button 
+            class="select-button" 
+            onclick="window.selectCustomer('${params.data.id}')"
+            type="button">
+            ✓ Seç
+          </button>
+        `;
       },
     },
   ];

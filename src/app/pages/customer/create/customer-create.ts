@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  linkedSignal,
-  resource,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, resource, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
@@ -36,16 +28,13 @@ import { CustomerCreateForm } from './customer-create.form';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
     MatCardModule,
+    MatIconModule,
+    MatFormFieldModule,
     MatSelectModule,
-    MatCheckboxModule,
+    MatButtonModule,
     MatRadioModule,
-    RouterModule,
+    MatCheckboxModule,
     ReactiveFormsModule,
   ],
 })

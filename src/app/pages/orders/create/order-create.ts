@@ -11,7 +11,7 @@ import BarcodeScanner from '../../../components/barcode-scanner/barcode-scanner'
 import { OrderStore } from '@shared/stores/order.store';
 
 @Component({
-  imports: [BarcodeScanner],
+  imports: [BarcodeScanner,],
   templateUrl: './order-create.html',
   styleUrl: './order-create.scss',
   encapsulation: ViewEncapsulation.None,

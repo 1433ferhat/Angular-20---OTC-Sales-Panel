@@ -19,12 +19,12 @@
           <p>{{ customer()?.phone }}</p>
           <span class="price-type">{{ getPriceTypeText(customer()?.type!) }}</span>
         </div>
-        <button mat-icon-button (click)="customer()" matTooltip="Müşteri Değiştir">
+        <button mat-icon-button (click)="selectCustomer()" matTooltip="Müşteri Değiştir">
           <mat-icon>edit</mat-icon>
         </button>
       </div>
       } @else {
-      <button mat-raised-button color="primary" (click)="customer()">
+      <button mat-raised-button color="primary" (click)="selectCustomer()">
         <mat-icon>person_add</mat-icon>
         Müşteri Seç
       </button>

@@ -70,18 +70,12 @@ export default class OrderPanel {
 
   createOrder = this.#orderStore.createOrder;
 
-  openCustomer() {
-    const dialogRef = this.dialog.open(CustomerSelection, {
-      width: '800px',
-      maxHeight: '90vh',
-      disableClose: false,
-      data: { selectedCustomer: this.customer() },
-    });
-
-    dialogRef.afterClosed().subscribe((selectedCustomer) => {
-      if (selectedCustomer) {
-        console.log('Seçilen müşteri:', selectedCustomer);
-      }
+  selectCustomer() {
+    this.dialog.open(CustomerSelection, {
+      width: '1100px',
+      height: '800px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
     });
   }
 }
