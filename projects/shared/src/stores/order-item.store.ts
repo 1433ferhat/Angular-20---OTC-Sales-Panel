@@ -3,6 +3,7 @@ import { OrderItemModel } from '@shared/models/order-item.model';
 import { ProductModel } from '@shared/models/product.model';
 import { CustomerStore } from './customer.store';
 import { ProductStore } from './product.store';
+import { PriceType } from '@shared/enums/price-type.enum';
 @Injectable({
   providedIn: 'root',
 })
@@ -36,7 +37,7 @@ export class OrderItemStore {
     if (!existingItem) {
       return;
     }
-    const customerType = this.selectCustomer()?.type;
+    const customerType = this.selectCustomer()?.type || PriceType.ECZ;
     const product = existingItem?.product;
     const price =
       product?.prices?.find((p) => p.priceType == customerType)?.price ?? 0;

@@ -15,9 +15,9 @@
       @if (customer()) {
       <div class="selected-customer">
         <div class="customer-info">
-          <h4>{{ customer().firstName +" "+ customer().firstName}}</h4>
-          <p>{{ customer().phone }}</p>
-          <span class="price-type">{{ getPriceTypeText(customer().type!) }}</span>
+          <h4>{{ customer()?.firstName +" "+ customer()?.firstName}}</h4>
+          <p>{{ customer()?.phone }}</p>
+          <span class="price-type">{{ getPriceTypeText(customer()?.type!) }}</span>
         </div>
         <button mat-icon-button (click)="customer()" matTooltip="Müşteri Değiştir">
           <mat-icon>edit</mat-icon>

@@ -18,6 +18,7 @@ import { OrderItemStore } from '@shared/stores/order-item.store';
 import { CustomerModel } from '@shared/models/customer.model';
 import { getPriceTypeLabel } from '@shared/enums/price-type.enum';
 import { ProductBarcodeModel } from '@shared/models/product-barcode.model';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-order-panel',
@@ -26,7 +27,13 @@ import { ProductBarcodeModel } from '@shared/models/product-barcode.model';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [MatCardModule, MatIconModule, CurrencyPipe, MatMenuModule],
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    CurrencyPipe,
+    MatMenuModule,
+  ],
 })
 export default class OrderPanel {
   readonly #orderItemStore = inject(OrderItemStore);
@@ -35,7 +42,7 @@ export default class OrderPanel {
   readonly items = computed<OrderItemModel[]>(() =>
     this.#orderItemStore.items()
   );
-  readonly customer = computed<CustomerModel>(() =>
+  readonly customer = computed<CustomerModel | undefined>(() =>
     this.#customerStore.customer()
   );
   readonly PaymentMethod = PaymentMethod;

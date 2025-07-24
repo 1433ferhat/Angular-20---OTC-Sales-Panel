@@ -10,7 +10,7 @@ import { OrderItemStore } from './order-item.store';
 export class CustomerStore {
   private http = inject(HttpClient);
   private readonly getOrderItemStore = () => inject(OrderItemStore);
-  readonly customer = signal<CustomerModel>({ ...initialCustomer });
+  readonly customer = signal<CustomerModel | undefined>(undefined);
 
   // Resource for customers (Angular 20 approach)
   customersResource = resource({
@@ -24,9 +24,7 @@ export class CustomerStore {
   error = computed(() => this.customersResource.error());
 
   selectCustomer(id: string) {
-    this.customer.set(
-      this.customers().find((c) => c.id === id) ?? { ...initialCustomer }
-    );
+    this.customer.set(this.customers().find((c) => c.id === id));
     this.getOrderItemStore().updatePrice();
   }
   async createCustomer(customer: CustomerModel): Promise<CustomerModel> {

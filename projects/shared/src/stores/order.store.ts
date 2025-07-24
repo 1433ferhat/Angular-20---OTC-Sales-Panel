@@ -45,7 +45,7 @@ export class OrderStore {
     try {
       const customer = this.#customerStore.customer();
       const orderData = {
-        customerId: customer.id,
+        customerId: customer?.id,
         customer: customer,
         items: this.items(),
         totalPrice: this.#orderItemStore.itemTotal(),
