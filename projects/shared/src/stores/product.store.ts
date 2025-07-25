@@ -28,29 +28,10 @@ export class ProductStore {
       ),
   });
 
-  categoriesResource = resource({
-    loader: () =>
-      lastValueFrom(
-        this.http.get<CategoryModel[]>('api/categories/getall').pipe(
-          catchError((error) => {
-            console.warn('Categories API hatası:', error);
-            return of([]); // Boş array döndür
-          })
-        )
-      ),
-  });
-
   // Computed signals
   products = computed(() => this.productsResource.value() || []);
-  categories = computed(() => this.categoriesResource.value() || []);
-  selectedCategory = computed(() => this._selectedCategory());
-  loading = computed(
-    () =>
-      this.productsResource.isLoading() || this.categoriesResource.isLoading()
-  );
-  error = computed(
-    () => this.productsResource.error() || this.categoriesResource.error()
-  );
+  loading = computed(() => this.productsResource.isLoading());
+  error = computed(() => this.productsResource.error());
 
   refresh() {
     this.productsResource.reload();
@@ -64,22 +45,6 @@ export class ProductStore {
     if (category === 'all') return products;
     return products.filter((p) => p.categoryId === category);
   });
-
-  constructor() {}
-
-  // Actions
-  loadProducts() {
-    this.productsResource.reload();
-  }
-
-  loadCategories() {
-    this.categoriesResource.reload();
-  }
-
-  refreshData() {
-    this.loadProducts();
-    this.loadCategories();
-  }
 
   setSelectedCategory(categoryId: string) {
     this._selectedCategory.set(categoryId);
@@ -153,7 +118,7 @@ export class ProductStore {
       );
 
       if (response) {
-        this.loadProducts();
+        this.productsResource.reload();
         return true;
       }
       return false;

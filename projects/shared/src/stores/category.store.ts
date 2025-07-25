@@ -24,15 +24,6 @@ export class CategoryStore {
   loading = computed(() => this.categoriesResource.isLoading());
   error = computed(() => this.categoriesResource.error());
 
-  constructor() {
-    // Resource automatically loads on initialization
-  }
-
-  // Actions
-  loadCategories() {
-    this.categoriesResource.reload();
-  }
-
   setSelectedCategory(categoryId: string | null) {
     this._selectedCategory.set(categoryId);
   }
@@ -51,7 +42,7 @@ export class CategoryStore {
   updateCategory(category: CategoryModel) {
     // API çağrısı yapıp sonra reload
     this.http.put(`api/categories/${category.id}`, category).subscribe({
-      next: () => this.loadCategories(),
+      next: () => this.categoriesResource.reload(),
       error: (error) => console.error('Category update error:', error)
     });
   }

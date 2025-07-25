@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject, resource } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { OrderModel } from '../models/order.model';
 import { OrderItemModel } from '../models/order-item.model';
 import { CustomerModel } from '../models/customer.model';
@@ -21,50 +21,46 @@ export class OrderStore {
   readonly items = computed<OrderItemModel[]>(() =>
     this.#orderItemStore.items()
   );
+
   // Signals
   private order = signal<OrderModel | null>(null);
 
   // Resource with error handling
-  ordersResource = resource({
-    loader: () =>
-      lastValueFrom(this.http.get<PaginateModel<OrderModel>>('api/orders')),
-  });
+  readonly ordersResource = httpResource<OrderModel[]>(
+    () => 'api/orders/getAll'
+  );
 
   // Computed signals
-  orders = computed(() => this.ordersResource.value()?.items || []);
+  orders = computed(() => this.ordersResource.value() || []);
   currentOrder = computed(() => this.order());
   loading = computed(() => this.ordersResource.isLoading());
   error = computed(() => this.ordersResource.error());
 
-  // Actions
-  loadOrders() {
-    this.ordersResource.reload();
-  }
-
   async createOrder(paymentMethod: PaymentMethod): Promise<boolean> {
     try {
       const customer = this.#customerStore.customer();
+      const items = this.items().map(({ productId, quantity, unitPrice }) => ({
+        productId,
+        quantity,
+        unitPrice,
+      }));
       const orderData = {
         customerId: customer?.id,
-        customer: customer,
-        items: this.items(),
-        totalPrice: this.#orderItemStore.itemTotal(),
-        totalQuantity: this.#orderItemStore.itemCount(),
+        items: items,
         paymentMethod: paymentMethod,
         status: OrderStatus.Completed,
       };
 
       const response = await lastValueFrom(
-        this.http.post<OrderModel>('api/orders/complete', orderData).pipe(
+        this.http.post<OrderModel>('api/orders', orderData).pipe(
           catchError((error) => {
-            console.error('Order completion error:', error);
             return of(null);
           })
         )
       );
 
       if (response) {
-        this.loadOrders();
+        this.ordersResource.reload();
         this.cancelOrder();
         return true;
       }
@@ -92,7 +88,7 @@ export class OrderStore {
       );
 
       if (response) {
-        this.loadOrders();
+        this.ordersResource.reload();
         return true;
       }
       return false;
@@ -102,7 +98,7 @@ export class OrderStore {
     }
   }
   cancelOrder() {
-    this.#orderItemStore.clearItems();
+    this.#orderItemStore.items.set([]);
     this.#customerStore.selectCustomer('');
   }
 }

@@ -1,32 +1,34 @@
 import { Injectable, signal, computed, inject, resource } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CustomerModel, initialCustomer } from '../models/customer.model';
-import { first, firstValueFrom, lastValueFrom, Observable } from 'rxjs';
-import { OrderItemStore } from './order-item.store';
+import { CustomerModel } from '../models/customer.model';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CustomerStore {
   private http = inject(HttpClient);
-  private readonly getOrderItemStore = () => inject(OrderItemStore);
-  readonly customer = signal<CustomerModel | undefined>(undefined);
-
-  // Resource for customers (Angular 20 approach)
   customersResource = resource({
     loader: () =>
       lastValueFrom(this.http.get<CustomerModel[]>('api/customers/getall')),
   });
 
   // Computed signals
-  customers = computed(() => this.customersResource.value() || []);
-  loading = computed(() => this.customersResource.isLoading());
-  error = computed(() => this.customersResource.error());
+  readonly customers = computed(() => this.customersResource.value() || []);
+  readonly loading = computed(() => this.customersResource.isLoading());
+  readonly error = computed(() => this.customersResource.error());
+
+  readonly selectedCustomerId = signal<string | undefined>(undefined);
+  readonly customer = computed(() => {
+    const id = this.selectedCustomerId();
+    const customer = id ? this.customers().find((c) => c.id === id) : undefined;
+    return customer;
+  });
 
   selectCustomer(id: string) {
-    this.customer.set(this.customers().find((c) => c.id === id));
-    this.getOrderItemStore().updatePrice();
+    this.selectedCustomerId.set(id);
   }
+
   async createCustomer(customer: CustomerModel): Promise<CustomerModel> {
     const result = await firstValueFrom(
       this.http.post<CustomerModel>('api/customers', customer)

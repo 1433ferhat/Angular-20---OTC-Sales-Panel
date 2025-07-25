@@ -1,4 +1,11 @@
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  signal,
+  untracked,
+} from '@angular/core';
 import { OrderItemModel } from '@shared/models/order-item.model';
 import { ProductModel } from '@shared/models/product.model';
 import { CustomerStore } from './customer.store';
@@ -11,9 +18,28 @@ export class OrderItemStore {
   readonly #customerStore = inject(CustomerStore);
   readonly #productStore = inject(ProductStore);
 
+  readonly customerType = computed(
+    () => this.#customerStore.customer()?.type ?? PriceType.ETIC
+  );
   readonly items = signal<OrderItemModel[]>([]);
   readonly products = signal<ProductModel[]>(this.#productStore.products());
-  readonly selectCustomer = computed(() => this.#customerStore.customer());
+
+  constructor() {
+    effect(() => {
+      const items = untracked(() => this.items());
+      const type = this.customerType();
+      if (!items.length) return;
+      const updatedItems = items.map((item) => {
+        const price =
+          item?.product?.prices?.find((p) => p.priceType == type)?.price ?? 0;
+        item.unitPrice = price;
+        item.totalPrice = price * item.quantity;
+        return { ...item };
+      });
+      this.items.set(updatedItems);
+    });
+  }
+
   addItem(product: ProductModel) {
     let existingItem = this.items().find((p) => p.productId == product.id);
     if (!existingItem) {
@@ -29,15 +55,13 @@ export class OrderItemStore {
       this.items.set([...this.items(), existingItem]);
     }
 
-    this.updateCartItemQuantity(existingItem.id, 1);
+    this.updateItemQuantity(existingItem.id, 1);
   }
 
-  updateCartItemQuantity(itemId: string, newQuantity: number) {
+  updateItemQuantity(itemId: string, newQuantity: number) {
     const existingItem = this.items().find((item) => itemId === itemId);
-    if (!existingItem) {
-      return;
-    }
-    const customerType = this.selectCustomer()?.type || PriceType.ECZ;
+    if (!existingItem) return;
+    const customerType = this.customerType();
     const product = existingItem?.product;
     const price =
       product?.prices?.find((p) => p.priceType == customerType)?.price ?? 0;
@@ -51,7 +75,7 @@ export class OrderItemStore {
           totalPrice: price * newQuantity,
         };
       }
-      return item;
+      return { ...item };
     });
     this.items.set(updatedItems);
   }
@@ -65,21 +89,14 @@ export class OrderItemStore {
   }
 
   itemTotal = computed(() => {
+    const type = untracked(() => this.customerType());
     return this.items().reduce((total, item) => {
-      const price = item.product?.prices?.[0]?.price || 0;
+      const price =
+        item.product?.prices?.find((p) => p.priceType == type)?.price ?? 0;
       return total + price * item.quantity;
     }, 0);
   });
   itemCount = computed(() => {
     return this.items().reduce((count, item) => count + item.quantity, 0);
   });
-
-  updatePrice() {
-    const items = this.items();
-    if (!items) return;
-
-    items.map((item) => {
-      this.updateCartItemQuantity(item.id, 0);
-    });
-  }
 }

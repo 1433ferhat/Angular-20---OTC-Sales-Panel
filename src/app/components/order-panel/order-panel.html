@@ -19,12 +19,12 @@
           <p>{{ customer()?.phone }}</p>
           <span class="price-type">{{ getPriceTypeText(customer()?.type!) }}</span>
         </div>
-        <button mat-icon-button (click)="selectCustomer()" matTooltip="Müşteri Değiştir">
+        <button mat-icon-button (click)="selectCustomerDialog()" matTooltip="Müşteri Değiştir">
           <mat-icon>edit</mat-icon>
         </button>
       </div>
       } @else {
-      <button mat-raised-button color="primary" (click)="selectCustomer()">
+      <button mat-raised-button color="primary" (click)="selectCustomerDialog()">
         <mat-icon>person_add</mat-icon>
         Müşteri Seç
       </button>
@@ -39,7 +39,7 @@
         <p>Sepet boş</p>
       </div>
       } @else {
-      @for (item of items(); track item.id) {
+      @for (item of items(); track $index) {
       <mat-card class="cart-item">
         <div class="item-info">
           <h4>{{ item.product?.name }}</h4>
@@ -49,14 +49,14 @@
 
         <div class="item-controls">
           <div class="quantity-controls">
-            <button mat-icon-button (click)="changeQuantity(item.id, -1)" [disabled]="item.quantity  <= 1">
+            <button mat-icon-button (click)="changeQuantity(item.id, item.quantity-1)" [disabled]="item.quantity  <= 1">
               <mat-icon>remove</mat-icon>
             </button>
 
             <input type="number" class="quantity-input" [value]="item.quantity"
-              (blur)="updateQuantityManual(item.id, $event)" min="1" max="999">
+              (keyup)="updateQuantityManual(item.id, $event)" min="1" max="999">
 
-            <button mat-icon-button (click)="changeQuantity(item.id, 1)">
+            <button mat-icon-button (click)="changeQuantity(item.id, item.quantity+1)">
               <mat-icon>add</mat-icon>
             </button>
           </div>
@@ -108,5 +108,9 @@
   <button mat-menu-item (click)="createOrder(PaymentMethod.CreditCard)">
     <mat-icon>credit_card</mat-icon>
     <span>Kredi Kartı</span>
+  </button>
+  <button mat-menu-item (click)="createOrder(PaymentMethod.BankTransfer)">
+    <mat-icon>account_balance</mat-icon>
+    <span>Havala/Eft</span>
   </button>
 </mat-menu>

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input'; // Bu eksikti
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
@@ -31,11 +31,13 @@ import { CustomerCreateForm } from './customer-create.form';
     MatCardModule,
     MatIconModule,
     MatFormFieldModule,
+    MatInputModule, // Bu eklendi
     MatSelectModule,
     MatButtonModule,
     MatRadioModule,
     MatCheckboxModule,
     ReactiveFormsModule,
+    RouterModule, // Bu da gerekli olabilir
   ],
 })
 export default class CustomerCreate {
@@ -104,6 +106,7 @@ export default class CustomerCreate {
       taxNumber: isEInvoice ? value.taxNumber : null,
     });
   }
+  
   onTypeChange(isCorporate: boolean) {
     const value: CustomerModel = this.result.value() ?? initialCustomer;
     this.form.patchValue({
@@ -114,6 +117,6 @@ export default class CustomerCreate {
     });
   }
 
-  priceTypeOptions = getPriceTypeOptions(); // sadece bir kere çağrılır
+  priceTypeOptions = getPriceTypeOptions();
   getPriceTypeLabel = getPriceTypeLabel;
 }

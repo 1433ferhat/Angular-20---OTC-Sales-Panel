@@ -16,7 +16,7 @@ import { CustomerStore } from '@shared/stores/customer.store';
 import { OrderStore } from '@shared/stores/order.store';
 import { OrderItemStore } from '@shared/stores/order-item.store';
 import { CustomerModel } from '@shared/models/customer.model';
-import { getPriceTypeLabel } from '@shared/enums/price-type.enum';
+import { getPriceTypeLabel, PriceType } from '@shared/enums/price-type.enum';
 import { ProductBarcodeModel } from '@shared/models/product-barcode.model';
 import { MatButtonModule } from '@angular/material/button';
 import CustomerSelection from '../customer-selection/customer-selection';
@@ -46,31 +46,47 @@ export default class OrderPanel {
   readonly items = computed<OrderItemModel[]>(() =>
     this.#orderItemStore.items()
   );
+
+  // customer - mevcut seçili müşteri
   readonly customer = computed<CustomerModel | undefined>(() =>
     this.#customerStore.customer()
   );
+
   readonly PaymentMethod = PaymentMethod;
+
   getBarcodeText(barcodes: ProductBarcodeModel[] | undefined) {
     return barcodes ? barcodes.map((b) => b.value).join(', ') : '';
   }
 
-  updateQuantityManual(itemId: string, event: FocusEvent) {
+  updateQuantityManual(itemId: string, event: KeyboardEvent) {
     const input = event.target as HTMLInputElement;
     const quantity = parseInt(input.value, 10);
 
     if (isNaN(quantity)) return;
 
-    this.#orderItemStore.updateCartItemQuantity(itemId, quantity);
+    this.#orderItemStore.updateItemQuantity(itemId, quantity);
   }
-  changeQuantity = this.#orderItemStore.updateCartItemQuantity;
-  removeItem = this.#orderItemStore.removeItem;
+
   readonly itemTotal = computed(() => this.#orderItemStore.itemTotal());
-  cancelOrder = this.#orderStore.cancelOrder;
-  getPriceTypeText = getPriceTypeLabel;
 
-  createOrder = this.#orderStore.createOrder;
+  //Siariş Oluştur
+  createOrder = (paymentMethod: PaymentMethod) =>
+    this.#orderStore.createOrder(paymentMethod);
 
-  selectCustomer() {
+  //Adet Değiştir
+  changeQuantity = (itemId: string, quantity: number) =>
+    this.#orderItemStore.updateItemQuantity(itemId, quantity);
+
+  //Sepet'den Sil
+  removeItem = (itemId: string) => this.#orderItemStore.removeItem(itemId);
+
+  //Sepet boşalt
+  cancelOrder = () => this.#orderStore.cancelOrder();
+
+  getPriceTypeText = (priceType: PriceType) => getPriceTypeLabel(priceType);
+
+  // selectCustomerDialog - müşteri seçim dialogunu açar
+  selectCustomerDialog() {
     this.dialog.open(CustomerSelection, {
       width: '1100px',
       height: '800px',

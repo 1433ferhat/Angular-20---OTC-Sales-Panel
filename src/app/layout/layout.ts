@@ -20,7 +20,6 @@ import { CategoryStore } from '@shared/stores/category.store';
 import { CustomerStore } from '@shared/stores/customer.store';
 import { CustomerModel } from '@shared/models/customer.model';
 import { Common } from '../services/common';
-import { OrderItemStore } from '@shared/stores/order-item.store';
 
 @Component({
   selector: 'app-layout',
@@ -46,7 +45,6 @@ export default class Layout {
 
   private productStore = inject(ProductStore);
   private orderStore = inject(OrderStore);
-  private orderItemStore = inject(OrderItemStore);
   private customerStore = inject(CustomerStore);
   private categoryStore = inject(CategoryStore);
   private common = inject(Common);
@@ -71,9 +69,9 @@ export default class Layout {
   );
 
   constructor() {
-    this.productStore.loadProducts();
-    this.categoryStore.loadCategories();
-    this.orderStore.loadOrders();
+    this.productStore.productsResource.reload();
+    this.categoryStore.categoriesResource.reload();
+    this.orderStore.ordersResource.reload();
     this.customerStore.customersResource.reload();
   }
 }
