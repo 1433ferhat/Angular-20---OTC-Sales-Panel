@@ -1,86 +1,20 @@
 <!-- src/app/pages/orders/orders.html -->
-<div class="orders-page">
+<div class="orders-container">
   <!-- Header Card -->
-  <mat-card class="page-header">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>receipt_long</mat-icon>
-        Sipariş Yönetimi
-      </mat-card-title>
-      <mat-card-subtitle>
-        Tüm siparişlerinizi buradan yönetebilirsiniz
-      </mat-card-subtitle>
-    </mat-card-header>
-    
-    <!-- Toolbar -->
+  <mat-card class="header-card">
     <mat-card-content>
-      <div class="toolbar">
-        <div class="toolbar-left">
-          <button 
-            mat-raised-button 
-            color="primary" 
-            (click)="refreshData()"
-            [disabled]="loading()"
-          >
-            <mat-icon>refresh</mat-icon>
-            Yenile
-          </button>
-          
-          <button 
-            mat-raised-button 
-            (click)="exportToExcel()"
-            [disabled]="loading() || orders().length === 0"
-          >
-            <mat-icon>download</mat-icon>
-            Excel'e Aktar
-          </button>
-        </div>
-        
-        <div class="toolbar-right">
-          @if (selectedOrders().length > 0) {
-            <div class="selected-actions">
-              <span class="selected-count">
-                {{ selectedOrders().length }} sipariş seçildi
-              </span>
-              
-              <button 
-                mat-raised-button 
-                (click)="exportSelectedToExcel()"
-              >
-                <mat-icon>download</mat-icon>
-                Seçilenleri Aktar
-              </button>
-              
-              <button 
-                mat-button 
-                [matMenuTriggerFor]="bulkMenu"
-                color="accent"
-              >
-                <mat-icon>more_vert</mat-icon>
-                Toplu İşlemler
-              </button>
-              
-              <mat-menu #bulkMenu="matMenu">
-                <button mat-menu-item (click)="changeSelectedOrdersStatus(orderStatus.Processing)">
-                  <mat-icon>autorenew</mat-icon>
-                  <span>İşleme Al</span>
-                </button>
-                <button mat-menu-item (click)="changeSelectedOrdersStatus(orderStatus.Shipped)">
-                  <mat-icon>local_shipping</mat-icon>
-                  <span>Kargoya Ver</span>
-                </button>
-                <button mat-menu-item (click)="changeSelectedOrdersStatus(orderStatus.Delivered)">
-                  <mat-icon>check_circle</mat-icon>
-                  <span>Teslim Edildi Olarak İşaretle</span>
-                </button>
-                <mat-divider></mat-divider>
-                <button mat-menu-item (click)="deleteSelectedOrders()" class="delete-action">
-                  <mat-icon>delete</mat-icon>
-                  <span>Seçilenleri Sil</span>
-                </button>
-              </mat-menu>
-            </div>
-          }
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="title">
+            <mat-icon>receipt_long</mat-icon>
+            Siparişler
+          </h1>
+          <div class="header-actions">
+            <button mat-raised-button color="primary" (click)="refreshGrid()">
+              <mat-icon>refresh</mat-icon>
+              Yenile
+            </button>
+          </div>
         </div>
       </div>
     </mat-card-content>

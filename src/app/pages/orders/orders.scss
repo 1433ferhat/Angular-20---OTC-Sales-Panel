@@ -1,72 +1,75 @@
-/* src/app/pages/orders/orders.scss */
-.orders-page {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+// src/app/pages/orders/orders.scss - TAM STILLER
+.orders-container {
   padding: 20px;
-  min-height: 100vh;
   background-color: #f5f5f5;
+  min-height: 100vh;
 
-  .page-header {
-    .mat-card-header {
-      padding-bottom: 0;
-      
-      .mat-card-title {
+  .header-card {
+    margin-bottom: 16px;
+
+    .header-content {
+      .title-section {
         display: flex;
         align-items: center;
-        gap: 12px;
-        font-size: 24px;
-        font-weight: 600;
-        color: #1976d2;
-        
-        mat-icon {
-          font-size: 28px;
-          width: 28px;
-          height: 28px;
-        }
-      }
-      
-      .mat-card-subtitle {
-        margin-top: 8px;
-        color: #666;
-        font-size: 14px;
-      }
-    }
+        justify-content: space-between;
+        margin-bottom: 16px;
 
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 20px;
-
-      .toolbar-left {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .toolbar-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-
-        .selected-actions {
+        .title {
           display: flex;
           align-items: center;
-          gap: 12px;
-          padding: 8px 16px;
-          background-color: #e3f2fd;
-          border-radius: 8px;
-          border: 1px solid #2196f3;
+          gap: 8px;
+          margin: 0;
+          font-size: 24px;
+          font-weight: 500;
+          color: #333;
 
-          .selected-count {
-            font-size: 14px;
-            font-weight: 500;
-            color: #1976d2;
+          mat-icon {
+            font-size: 28px;
+            width: 28px;
+            height: 28px;
+          }
+        }
+
+        .header-actions {
+          display: flex;
+          gap: 8px;
+        }
+      }
+
+      .stats-section {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+
+        .stat-chip {
+          background: #e3f2fd;
+          color: #0277bd;
+          padding: 4px 12px;
+          border-radius: 16px;
+          font-size: 14px;
+          font-weight: 500;
+        }
+      }
+
+      .action-section {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .selection-info {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: #666;
+          font-size: 14px;
+        }
+
+        .bulk-actions {
+          display: flex;
+          gap: 8px;
+
+          .delete-action {
+            color: #d32f2f;
           }
         }
       }
@@ -74,14 +77,7 @@
   }
 
   .grid-card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-
-    .mat-card-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    mat-card-content {
       padding: 0;
 
       .loading-container {
@@ -115,6 +111,15 @@
   }
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* AG-Grid Custom Styles */
 .orders-grid {
   --ag-header-background-color: #f8f9fa;
@@ -139,6 +144,8 @@
   .ag-cell {
     padding: 0 12px;
     border-right: 1px solid var(--ag-border-color);
+    display: flex;
+    align-items: center;
     
     &:focus {
       outline: 2px solid #1976d2;
@@ -154,13 +161,136 @@
     }
   }
 
+  // Checkbox cell
+  .checkbox-cell {
+    justify-content: center;
+  }
+
+  // Document number cell
+  .document-number-cell {
+    .document-number {
+      font-weight: 600;
+      color: #1976d2;
+    }
+  }
+
+  // Price cell
+  .price-cell {
+    justify-content: flex-end;
+    font-weight: 600;
+    color: #2e7d32;
+  }
+
+  // Quantity cell
+  .quantity-cell {
+    justify-content: center;
+    font-weight: 500;
+  }
+
+  // Status chips
+  .status-chip {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    
+    &.status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    &.status-approved {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+    
+    &.status-preparing {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    &.status-shipping {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+    
+    &.status-delivered {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    &.status-cancelled {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    &.status-unknown {
+      background-color: #e2e3e5;
+      color: #383d41;
+    }
+  }
+
+  // Payment method
+  .payment-method {
+    font-weight: 500;
+    color: #495057;
+  }
+
+  // Action buttons
+  .actions-cell {
+    justify-content: center;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+
+    .action-btn {
+      border: none;
+      background: none;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: #f0f0f0;
+        transform: scale(1.1);
+      }
+      
+      &.view-btn:hover {
+        background-color: #e3f2fd;
+      }
+      
+      &.edit-btn:hover {
+        background-color: #fff3e0;
+      }
+      
+      &.print-btn:hover {
+        background-color: #f3e5f5;
+      }
+    }
+  }
+
+  // Floating filters
   .ag-floating-filter-input {
     padding: 6px 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 13px;
+    
+    &:focus {
+      border-color: #1976d2;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+    }
   }
 
+  // Pagination
   .ag-paging-panel {
     padding: 12px 20px;
     background-color: #f8f9fa;
@@ -191,118 +321,16 @@
       cursor: not-allowed;
     }
   }
-}
 
-/* Action Buttons in Grid */
-:global(.action-btn) {
-  background: none;
-  border: none;
-  padding: 4px 6px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s ease;
-  
-  &:hover {
-    background-color: #f0f0f0;
-    transform: scale(1.1);
-  }
-  
-  &.view-btn:hover {
-    background-color: #e3f2fd;
-  }
-  
-  &.edit-btn:hover {
-    background-color: #fff3e0;
-  }
-  
-  &.print-btn:hover {
-    background-color: #f3e5f5;
+  .ag-paging-button.ag-paging-button-current {
+    background: #1976d2;
+    color: white;
+    border-color: #1976d2;
   }
 }
 
-/* Delete Action Button */
-.delete-action {
-  color: #f44336 !important;
-  
-  mat-icon {
-    color: #f44336;
-  }
-  
-  &:hover {
-    background-color: #ffebee !important;
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .orders-page {
-    padding: 12px;
-    gap: 16px;
-
-    .page-header {
-      .toolbar {
-        flex-direction: column;
-        align-items: stretch;
-
-        .toolbar-left,
-        .toolbar-right {
-          justify-content: center;
-        }
-
-        .selected-actions {
-          flex-direction: column;
-          text-align: center;
-          gap: 8px;
-        }
-      }
-    }
-
-    .grid-card {
-      .orders-grid {
-        height: 500px;
-      }
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .orders-page {
-    padding: 8px;
-
-    .page-header {
-      .mat-card-title {
-        font-size: 20px;
-        
-        mat-icon {
-          font-size: 24px;
-          width: 24px;
-          height: 24px;
-        }
-      }
-
-      .toolbar {
-        .toolbar-left,
-        .toolbar-right {
-          width: 100%;
-        }
-      }
-    }
-
-    .grid-card {
-      .orders-grid {
-        height: 400px;
-      }
-    }
-  }
-}
-
-/* Loading Animation */
+// Loading animation keyframes
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
